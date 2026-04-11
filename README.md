@@ -1,6 +1,3 @@
-Here’s your **final, polished, complete README** with your **Sample Output section fully integrated + refined formatting** 👇
-
----
 
 ````markdown
 <div align="center">

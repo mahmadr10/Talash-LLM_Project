@@ -1,5 +1,4 @@
 
-````markdown
 # 🔍 TALASH: Talent Acquisition & Learning Automation for Smart Hiring
 *An Intelligent CV Parsing and Talent Acquisition System powered by Google Gemini*
 
@@ -79,8 +78,6 @@ TALASH uses a **Hub-and-Spoke relational database model** for scalable querying 
 - **JSONB Extensibility** → Flexible metadata storage  
 - **🔐 Row-Level Security (RLS)** → Protects candidate data  
 - **⚡ Indexed Foreign Keys** → Fast joins and queries  
-
-````
 
 2. Add secrets:
 

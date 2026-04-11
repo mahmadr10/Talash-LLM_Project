@@ -1,22 +1,22 @@
 
 ````markdown
-<div align="center">
-  <h1>🔍 TALASH: Talent Acquisition & Learning Automation for Smart Hiring</h1>
-  <p><i>An Intelligent CV Parsing and Talent Acquisition System powered by Google Gemini</i></p>
-  
-  [![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/)
-  [![Gemini API](https://img.shields.io/badge/Google%20Gemini-Pro%20Ready-orange)](https://ai.google.dev/)
-  [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-47C7A2?logo=supabase)](https://supabase.com/)
-  [![Kaggle](https://img.shields.io/badge/Kaggle-Environment-20BEFF?logo=kaggle)](https://www.kaggle.com/)
-</div>
+# 🔍 TALASH: Talent Acquisition & Learning Automation for Smart Hiring
+*An Intelligent CV Parsing and Talent Acquisition System powered by Google Gemini*
+
+<p align="center">
+  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.9+-blue.svg"></a>
+  <a href="https://ai.google.dev/"><img src="https://img.shields.io/badge/Google%20Gemini-Pro%20Ready-orange"></a>
+  <a href="https://supabase.com/"><img src="https://img.shields.io/badge/Supabase-PostgreSQL-47C7A2?logo=supabase"></a>
+  <a href="https://www.kaggle.com/"><img src="https://img.shields.io/badge/Kaggle-Environment-20BEFF?logo=kaggle"></a>
+</p>
 
 ---
 
 **Course:** CS 417 - Large Language Models (Spring 2026)  
 **University:** NUST Islamabad  
 **Instructor:** Prof. Dr. Muhammad Moazam Fraz  
-**Team Member (Milestone 1):** [Nameer Ahmed - 454029][Rimsha Mahmood - 455080][Muhammad Ahmed Riaz - 461348]   
-**Repository:** https://github.com/mahmadr10/Talash-LLM_Project  
+**Team Member (Milestone 1):** Nameer Ahmed - 454029 · Rimsha Mahmood - 455080 · Muhammad Ahmed Riaz - 461348  
+**Repository:** [https://github.com/mahmadr10/Talash-LLM_Project](https://github.com/mahmadr10/Talash-LLM_Project)
 
 ---
 
@@ -60,9 +60,9 @@ Pipeline Flow:
 
 > **PDF → Text Extraction → Prompt Engineering → Gemini → JSON Validation → Database Insertion**
 
-<div align="center">
-  <img src="./assets/Architecture_Diagram.png" alt="System Architecture" width="800"/>
-</div>
+<p align="center">
+  <img src="assets/Architecture_Diagram.png" alt="System Architecture" width="800"/>
+</p>
 
 ---
 
@@ -70,9 +70,9 @@ Pipeline Flow:
 
 TALASH uses a **Hub-and-Spoke relational database model** for scalable querying and analytics.
 
-<div align="center">
-  <img src="./assets/ERD_TALASH.png" alt="ER Diagram" width="800"/>
-</div>
+<p align="center">
+  <img src="assets/ERD_TALASH.png" alt="ER Diagram" width="800"/>
+</p>
 
 ### 🧩 Highlights
 
@@ -80,27 +80,6 @@ TALASH uses a **Hub-and-Spoke relational database model** for scalable querying 
 - **🔐 Row-Level Security (RLS)** → Protects candidate data  
 - **⚡ Indexed Foreign Keys** → Fast joins and queries  
 
----
-
-## 🤖 LLM Integration Strategy
-
-Powered by **Google Gemini**, replacing traditional NLP pipelines.
-
-### 🛡️ Guardrails
-
-1. **No Hallucination** → Extract only explicit data  
-2. **Strict JSON Schema** → Ensures structured output  
-3. **Enum Normalization** → Standardized categories  
-
----
-
-## 🚀 Setup & Installation
-
-### Option A: Kaggle (Recommended)
-
-1. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
 ````
 
 2. Add secrets:

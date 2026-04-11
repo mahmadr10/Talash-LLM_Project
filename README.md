@@ -280,11 +280,5 @@ Experience: Assistant Professor at NUST (2021-Present)
 * 📈 HR analytics dashboard
 * 🤖 Fine-tuned LLM
 
----
-
-<div align="center">
-  <b>🚀 TALASH — Transforming Recruitment with AI</b>
-</div>
-```
 
 

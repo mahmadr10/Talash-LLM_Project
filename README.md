@@ -1,5 +1,5 @@
 
-# 🔍 TALASH: Talent Acquisition & Learning Automation for Smart Hiring
+#  TALASH: Talent Acquisition & Learning Automation for Smart Hiring
 *An Intelligent CV Parsing and Talent Acquisition System powered by Google Gemini*
 
 <p align="center">
@@ -14,7 +14,7 @@
 **Course:** CS 417 - Large Language Models (Spring 2026)  
 **University:** NUST Islamabad  
 **Instructor:** Prof. Dr. Muhammad Moazam Fraz  
-**Team Member (Milestone 1):** Nameer Ahmed - 454029 · Rimsha Mahmood - 455080 · Muhammad Ahmed Riaz - 461348  
+**Team Member (Milestone 1):** Nameer Ahmed - 454029 · Rimsha Mahmood - 455080 · Muhammad Ahmad - 461348  
 **Repository:** [https://github.com/mahmadr10/Talash-LLM_Project](https://github.com/mahmadr10/Talash-LLM_Project)
 
 ---

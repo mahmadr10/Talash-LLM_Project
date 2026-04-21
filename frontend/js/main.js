@@ -15,10 +15,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function apiGet(url) {
     const response = await fetch(url);
-    if (!response.ok) {
-        throw new Error(`Request failed: ${response.status}`);
+    return parseApiResponse(response);
+}
+
+async function parseApiResponse(response) {
+    const contentType = response.headers.get('content-type') || '';
+
+    if (contentType.includes('application/json')) {
+        const payload = await response.json();
+        if (!response.ok) {
+            throw new Error(payload.error || `Request failed: ${response.status}`);
+        }
+        return payload;
     }
-    return response.json();
+
+    const text = await response.text();
+    if (text.toLowerCase().includes('the page could not be found')) {
+        throw new Error('Backend API is not available on this deployment. Run the Flask backend to use upload and analysis APIs.');
+    }
+
+    const snippet = text.replace(/\s+/g, ' ').slice(0, 120);
+    throw new Error(`Unexpected API response (${response.status}): ${snippet}`);
 }
 
 function bindLogin() {
@@ -47,11 +64,7 @@ function bindUpload(inputId) {
                 method: 'POST',
                 body: formData
             });
-            const payload = await response.json();
-
-            if (!response.ok) {
-                throw new Error(payload.error || 'Upload failed');
-            }
+            const payload = await parseApiResponse(response);
 
             alert(`CV uploaded successfully for candidate ID ${payload.candidate_id}.`);
             if (window.location.pathname.endsWith('index.html')) {

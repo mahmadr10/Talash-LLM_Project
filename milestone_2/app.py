@@ -5,8 +5,6 @@ Core CV Processing and Analysis Pipeline API
 
 import os
 import json
-import re
-import pandas as pd
 from pathlib import Path
 from flask import Flask, render_template, request, jsonify, send_file
 from werkzeug.utils import secure_filename
@@ -16,7 +14,7 @@ import traceback
 
 # Import the analysis module
 from milestone2 import Milestone2Analysis
-from cv_batch_processor import CVBatchProcessor
+from cv_batch_processor import CVBatchProcessor, parse_cv_text_to_structured as shared_parse_cv_text_to_structured
 
 # Flask App Configuration
 app = Flask(__name__)
@@ -45,29 +43,8 @@ def load_candidate_database(sample_file='sample_cv_data.json'):
 
 
 def parse_cv_text_to_structured(raw_text, fallback_name):
-    """Basic rule-based parsing for minimum structured extraction demo."""
-    text = raw_text or ""
-    email_match = re.search(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}', text)
-    phone_match = re.search(r'(\+?\d[\d\s\-]{8,}\d)', text)
-
-    skill_tokens = [
-        'python', 'sql', 'aws', 'docker', 'machine learning', 'research', 'statistics',
-        'tableau', 'r', 'data analysis', 'system design', 'flask', 'django'
-    ]
-    found_skills = []
-    lower_text = text.lower()
-    for token in skill_tokens:
-        if token in lower_text:
-            found_skills.append({'skill_name': token.title()})
-
-    return {
-        'name': fallback_name,
-        'email': email_match.group(0) if email_match else '',
-        'phone_number': phone_match.group(0).strip() if phone_match else '',
-        'skills': found_skills,
-        'education': [],
-        'experience': []
-    }
+    """Backward-compatible wrapper around the shared parser."""
+    return shared_parse_cv_text_to_structured(raw_text, fallback_name)
 
 
 # In-memory candidate database (for demo purposes)

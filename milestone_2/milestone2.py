@@ -1,4 +1,3 @@
-import pandas as pd
 from datetime import datetime
 
 class Milestone2Analysis:
@@ -26,31 +25,48 @@ class Milestone2Analysis:
         Analyzes the candidate's educational background for consistency, gaps, 
         and institutional quality.
         """
-        education_df = pd.DataFrame(self.data.get('education', []))
-        if education_df.empty:
+        education = list(self.data.get('education', []))
+        if not education:
             self.analysis_summary['education_analysis'] = "No education data found."
             return
 
-        # Sort by end year to analyze progression
-        education_df['passing_year'] = pd.to_numeric(education_df['passing_year'], errors='coerce')
-        education_df = education_df.sort_values(by='passing_year').reset_index()
+        def parse_year(record):
+            try:
+                return int(record.get('passing_year'))
+            except (TypeError, ValueError):
+                return None
+
+        education_sorted = sorted(
+            education,
+            key=lambda record: (parse_year(record) is None, parse_year(record) or 0)
+        )
 
         gaps = []
-        for i in range(1, len(education_df)):
-            gap = education_df.loc[i, 'passing_year'] - education_df.loc[i-1, 'passing_year']
-            if gap > 1:
-                gaps.append(f"A {gap}-year gap found between "
-                            f"{education_df.loc[i-1, 'degree_name']} and "
-                            f"{education_df.loc[i, 'degree_name']}.")
+        for i in range(1, len(education_sorted)):
+            current_year = parse_year(education_sorted[i])
+            previous_year = parse_year(education_sorted[i - 1])
+            if current_year is None or previous_year is None:
+                continue
+
+            gap = current_year - previous_year
+            if gap > 2:
+                gaps.append(
+                    f"A {gap}-year gap found between "
+                    f"{education_sorted[i - 1].get('degree_name', 'previous degree')} and "
+                    f"{education_sorted[i].get('degree_name', 'current degree')}."
+                )
 
         # Institutional Quality
-        ranked_institutions = education_df[education_df['qs_ranking'].notna() | education_df['the_ranking'].notna()]
+        ranked_institutions = [
+            record for record in education_sorted
+            if record.get('qs_ranking') is not None or record.get('the_ranking') is not None
+        ]
         
         summary = {
-            "educational_gaps": gaps if gaps else "No significant educational gaps detected.",
-            "institutional_quality": f"{len(ranked_institutions)} out of {len(education_df)} "
+            "educational_gaps": gaps if gaps else ["No significant educational gaps detected."],
+            "institutional_quality": f"{len(ranked_institutions)} out of {len(education_sorted)} "
                                      f"degrees are from ranked institutions.",
-            "highest_qualification": education_df.iloc[-1]['degree_name'] if not education_df.empty else "N/A"
+            "highest_qualification": education_sorted[-1].get('degree_name', 'N/A') if education_sorted else "N/A"
         }
         self.analysis_summary['education_analysis'] = summary
 
@@ -58,43 +74,61 @@ class Milestone2Analysis:
         """
         Analyzes professional experience for timeline consistency and career progression.
         """
-        experience_df = pd.DataFrame(self.data.get('experience', []))
-        if experience_df.empty:
+        experience = list(self.data.get('experience', []))
+        if not experience:
             self.analysis_summary['experience_analysis'] = "No professional experience data found."
             return
 
-        # Convert dates and sort
-        experience_df['start_date'] = pd.to_datetime(experience_df['start_date'], errors='coerce')
-        experience_df['end_date'] = pd.to_datetime(experience_df['end_date'], errors='coerce').fillna(datetime.now())
-        experience_df = experience_df.sort_values(by='start_date').reset_index()
+        def parse_date(value):
+            if not value:
+                return datetime.now()
+            if isinstance(value, datetime):
+                return value
+            for fmt in ('%Y-%m-%d', '%Y-%m', '%Y'):
+                try:
+                    return datetime.strptime(str(value), fmt)
+                except ValueError:
+                    continue
+            return datetime.now()
+
+        experience_sorted = sorted(experience, key=lambda record: parse_date(record.get('start_date')))
 
         overlaps = []
         gaps = []
-        for i in range(1, len(experience_df)):
+        for i in range(1, len(experience_sorted)):
+            previous = experience_sorted[i - 1]
+            current = experience_sorted[i]
+            previous_end = parse_date(previous.get('end_date'))
+            current_start = parse_date(current.get('start_date'))
+
             # Check for overlap
-            if experience_df.loc[i, 'start_date'] < experience_df.loc[i-1, 'end_date']:
-                overlaps.append(f"Overlap detected between "
-                                f"{experience_df.loc[i-1, 'job_title']} and "
-                                f"{experience_df.loc[i, 'job_title']}.")
+            if current_start < previous_end:
+                overlaps.append(
+                    f"Overlap detected between "
+                    f"{previous.get('job_title', 'previous role')} and "
+                    f"{current.get('job_title', 'current role')}."
+                )
             # Check for gaps
-            gap_days = (experience_df.loc[i, 'start_date'] - experience_df.loc[i-1, 'end_date']).days
+            gap_days = (current_start - previous_end).days
             if gap_days > 90: # More than 3 months
-                gaps.append(f"A gap of ~{round(gap_days/30)} months found between "
-                            f"{experience_df.loc[i-1, 'job_title']} and "
-                            f"{experience_df.loc[i, 'job_title']}.")
+                gaps.append(
+                    f"A gap of ~{round(gap_days/30)} months found between "
+                    f"{previous.get('job_title', 'previous role')} and "
+                    f"{current.get('job_title', 'current role')}."
+                )
 
         progression = "No clear progression pattern identified."
-        titles = [str(t).lower() for t in experience_df['job_title'].tolist()]
+        titles = [str(record.get('job_title', '')).lower() for record in experience_sorted]
         if any("senior" in t for t in titles):
             progression = "Progression to senior role detected."
         elif len(titles) > 1:
             progression = "Role transitions detected across the timeline."
 
         summary = {
-            "timeline_overlaps": overlaps if overlaps else "No job overlaps detected.",
-            "professional_gaps": gaps if gaps else "No significant professional gaps detected.",
+            "timeline_overlaps": overlaps if overlaps else ["No job overlaps detected."],
+            "professional_gaps": gaps if gaps else ["No significant professional gaps detected."],
             "career_progression": progression,
-            "employment_history_count": len(experience_df)
+            "employment_history_count": len(experience_sorted)
         }
         self.analysis_summary['experience_analysis'] = summary
 
@@ -121,7 +155,7 @@ class Milestone2Analysis:
         """
         Analyzes alignment between claimed skills and evidence from experience/publications.
         """
-        skills = [s['skill_name'].lower() for s in self.data.get('skills', [])]
+        skills = [str(skill.get('skill_name', '')).lower() for skill in self.data.get('skills', []) if skill.get('skill_name')]
         if not skills:
             self.analysis_summary['skill_alignment'] = "No skills data found."
             return
@@ -129,10 +163,30 @@ class Milestone2Analysis:
         evidence_text = ""
         for exp in self.data.get('experience', []):
             evidence_text += exp.get('job_title', '').lower() + " "
+            evidence_text += exp.get('job_description', '').lower() + " "
+            evidence_text += exp.get('industry', '').lower() + " "
         for pub in self.data.get('research_outputs', []):
             evidence_text += pub.get('title', '').lower() + " "
+            evidence_text += pub.get('publication', '').lower() + " "
 
-        aligned_skills = [skill for skill in skills if skill in evidence_text]
+        skill_aliases = {
+            'aws': ['cloud', 'infrastructure', 'amazon web services'],
+            'docker': ['container', 'containers', 'orchestration'],
+            'machine learning': ['machine learning', 'ml', 'predictive model', 'predictive models'],
+            'research': ['research', 'publication', 'publications', 'paper', 'papers'],
+            'system design': ['system design', 'architecture', 'architected', 'architectural'],
+            'python': ['python', 'django', 'flask'],
+            'sql': ['sql', 'database', 'databases'],
+            'statistics': ['statistics', 'statistical', 'analytics', 'analysis'],
+            'tableau': ['tableau', 'dashboard', 'dashboards'],
+            'r': [' r ', 'r programming', 'statistics']
+        }
+
+        aligned_skills = []
+        for skill in skills:
+            aliases = skill_aliases.get(skill, [skill])
+            if any(alias in evidence_text for alias in aliases):
+                aligned_skills.append(skill)
         
         summary = {
             "claimed_skills": len(skills),
@@ -147,17 +201,18 @@ class Milestone2Analysis:
         Detects missing information in the candidate's profile and generates a draft email.
         """
         missing_fields = []
-        if not self.data.get('candidates', {}).get('email'):
+        candidate = self.data.get('candidates', {})
+        if not candidate.get('email'):
             missing_fields.append("Candidate Email")
-        if not self.data.get('candidates', {}).get('phone_number'):
+        if not candidate.get('phone_number'):
             missing_fields.append("Candidate Phone Number")
         
-        education_df = pd.DataFrame(self.data.get('education', []))
-        if not education_df.empty and education_df['grade_value'].isnull().any():
+        education = list(self.data.get('education', []))
+        if education and any(record.get('grade_value') in (None, '') for record in education):
             missing_fields.append("Grade/CGPA for one or more degrees")
 
-        experience_df = pd.DataFrame(self.data.get('experience', []))
-        if not experience_df.empty and experience_df['job_description'].isnull().any():
+        experience = list(self.data.get('experience', []))
+        if experience and any(not record.get('job_description') for record in experience):
             missing_fields.append("Job description for one or more experience records")
 
         research_outputs = self.data.get('research_outputs', [])
@@ -170,7 +225,7 @@ class Milestone2Analysis:
             self.analysis_summary['missing_information'] = {"status": "No critical information missing."}
             return
 
-        candidate_name = self.data.get('candidates', {}).get('full_name', 'Candidate')
+        candidate_name = candidate.get('full_name', 'Candidate')
         email_body = f"Dear {candidate_name},\n\n" \
                      f"Thank you for your interest. We are reviewing your application and noticed " \
                      f"that the following information is missing or incomplete in your CV:\n\n"

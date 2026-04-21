@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TALASH - Reports</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 24px;
+            margin: 24px 0;
+        }
+        .chart-container {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(18, 24, 38, 0.04);
+            position: relative;
+            height: 300px;
+        }
+        .chart-container h4 {
+            margin: 0 0 16px 0;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #0f1b2d;
+        }
+        .chart-container canvas {
+            max-height: 250px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo">
+                <h1>TALASH</h1>
+                <p>ANALYTICAL LEDGER</p>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">DASHBOARD</a></li>
+                    <li><a href="candidates.html">CANDIDATES</a></li>
+                    <li class="active"><a href="reports.html">REPORTS</a></li>
+                    <li><a href="settings.html">SETTINGS</a></li>
+                </ul>
+            </nav>
+            <div class="upload-cv-sidebar">
+                <label for="cv-upload-input" class="btn-secondary">UPLOAD CV</label>
+                <input type="file" id="cv-upload-input" style="display: none;">
+            </div>
+        </aside>
+        <main class="main-content">
+            <header>
+                <div class="search-bar">
+                    <input type="text" placeholder="SEARCH REPORTS...">
+                </div>
+                <div class="user-profile">
+                    <div class="profile">
+                        <span>PROFILE</span>
+                        <img src="https://via.placeholder.com/30" alt="User Avatar">
+                    </div>
+                </div>
+            </header>
+            <div class="dashboard-header">
+                <div>
+                    <h2 class="page-title">Reports</h2>
+                    <p class="page-subtitle">Hiring metrics, summaries, and export-ready outputs</p>
+                </div>
+                <a class="btn-primary" href="index.html">Back to dashboard</a>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="stats">
+                <div class="stat-card"><h3>AVERAGE SCORE</h3><p class="stat-number">87</p></div>
+                <div class="stat-card"><h3>FLAGGED PROFILES</h3><p class="stat-number">42</p></div>
+                <div class="stat-card"><h3>COMPLETE PROFILES</h3><p class="stat-number">1,102</p></div>
+            </div>
+
+            <!-- Charts Section -->
+            <section class="analysis-queue">
+                <div class="queue-header">
+                    <h3>VISUALIZATION & ANALYTICS</h3>
+                </div>
+
+                <div class="charts-grid">
+                    <!-- Score Distribution Chart -->
+                    <div class="chart-container">
+                        <h4>Score Distribution</h4>
+                        <canvas id="scoreChart"></canvas>
+                    </div>
+
+                    <!-- Profile Completion Chart -->
+                    <div class="chart-container">
+                        <h4>Profile Completion Status</h4>
+                        <canvas id="completionChart"></canvas>
+                    </div>
+
+                    <!-- Analysis Status Chart -->
+                    <div class="chart-container">
+                        <h4>Analysis Pipeline Status</h4>
+                        <canvas id="statusChart"></canvas>
+                    </div>
+
+                    <!-- Skill Distribution Chart -->
+                    <div class="chart-container">
+                        <h4>Top Skills Distribution</h4>
+                        <canvas id="skillsChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reports Table -->
+            <section class="analysis-queue">
+                <div class="queue-header">
+                    <h3>GENERATED REPORTS</h3>
+                    <div class="queue-actions">
+                        <button>DOWNLOAD</button>
+                        <button>REFRESH</button>
+                    </div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>REPORT</th>
+                            <th>ANALYSIS TYPE</th>
+                            <th>DATE</th>
+                            <th>STATUS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Hiring Summary</td>
+                            <td>Overall Candidate Assessment</td>
+                            <td>2024-01-26</td>
+                            <td><span class="status complete">READY</span></td>
+                        </tr>
+                        <tr>
+                            <td>Skill Gap Analysis</td>
+                            <td>Technical Skills Mapping</td>
+                            <td>2024-01-25</td>
+                            <td><span class="status processing">PROCESSING</span></td>
+                        </tr>
+                        <tr>
+                            <td>Educational Profile Report</td>
+                            <td>Institution & Qualification Analysis</td>
+                            <td>2024-01-24</td>
+                            <td><span class="status complete">READY</span></td>
+                        </tr>
+                        <tr>
+                            <td>Missing Information Alerts</td>
+                            <td>Data Completeness Check</td>
+                            <td>2024-01-23</td>
+                            <td><span class="status pending">PENDING</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Chart.js configuration
+        const chartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom'
+                }
+            }
+        };
+
+        // 1. Score Distribution (Histogram)
+        const scoreCtx = document.getElementById('scoreChart').getContext('2d');
+        new Chart(scoreCtx, {
+            type: 'bar',
+            data: {
+                labels: ['50-60', '60-70', '70-80', '80-90', '90-100'],
+                datasets: [{
+                    label: 'Candidates',
+                    data: [45, 120, 320, 540, 259],
+                    backgroundColor: '#0f1b2d',
+                    borderRadius: 4
+                }]
+            },
+            options: chartOptions
+        });
+
+        // 2. Profile Completion Status (Pie Chart)
+        const completionCtx = document.getElementById('completionChart').getContext('2d');
+        new Chart(completionCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Complete', 'Incomplete', 'In Progress'],
+                datasets: [{
+                    data: [1102, 130, 52],
+                    backgroundColor: ['#0f1b2d', '#fbf7f0', '#d4a574']
+                }]
+            },
+            options: chartOptions
+        });
+
+        // 3. Analysis Pipeline Status (Line Chart)
+        const statusCtx = document.getElementById('statusChart').getContext('2d');
+        new Chart(statusCtx, {
+            type: 'line',
+            data: {
+                labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'],
+                datasets: [
+                    {
+                        label: 'Completed',
+                        data: [150, 320, 580, 920, 1102],
+                        borderColor: '#0f1b2d',
+                        backgroundColor: 'rgba(15, 27, 45, 0.1)',
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Processing',
+                        data: [200, 180, 120, 90, 52],
+                        borderColor: '#d4a574',
+                        backgroundColor: 'rgba(212, 165, 116, 0.1)',
+                        tension: 0.4
+                    }
+                ]
+            },
+            options: {
+                ...chartOptions,
+                plugins: {
+                    ...chartOptions.plugins,
+                    filler: {
+                        propagate: true
+                    }
+                }
+            }
+        });
+
+        // 4. Top Skills Distribution (Horizontal Bar)
+        const skillsCtx = document.getElementById('skillsChart').getContext('2d');
+        new Chart(skillsCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Python', 'AWS', 'SQL', 'Research', 'Docker', 'Machine Learning'],
+                datasets: [{
+                    label: 'Candidate Count',
+                    data: [892, 756, 834, 421, 567, 389],
+                    backgroundColor: '#0f1b2d',
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                ...chartOptions,
+                indexAxis: 'y'
+            }
+        });
+    </script>
+</body>
+</html>

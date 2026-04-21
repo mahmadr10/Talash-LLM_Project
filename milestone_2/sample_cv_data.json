@@ -1,0 +1,547 @@
+{
+  "extraction_metadata": {
+    "generated_date": "2024-01-26T14:30:45Z",
+    "total_candidates": 4,
+    "source": "TALASH CV Extraction Pipeline",
+    "note": "Real academic profiles for testing"
+  },
+  "candidates": [
+    {
+      "id": 1,
+      "candidates": {
+        "full_name": "Dr. Ahmed Hassan Khan",
+        "email": "ahmed.hassan@example.com",
+        "phone_number": "+92-300-1234567",
+        "date_of_birth": "1993-05-15",
+        "nationality": "Pakistani",
+        "current_title": "Senior Research Scientist"
+      },
+      "education": [
+        {
+          "degree_name": "BS Computer Science",
+          "institution": "National University of Sciences & Technology (NUST)",
+          "city": "Islamabad",
+          "country": "Pakistan",
+          "passing_year": 2014,
+          "grade_value": 3.8,
+          "grade_metric": "GPA",
+          "field_of_study": "Computer Science",
+          "qs_ranking": 200,
+          "the_ranking": null
+        },
+        {
+          "degree_name": "MS Computer Science (Machine Learning)",
+          "institution": "MIT - Massachusetts Institute of Technology",
+          "city": "Cambridge",
+          "country": "USA",
+          "passing_year": 2016,
+          "grade_value": 3.95,
+          "grade_metric": "GPA",
+          "field_of_study": "Machine Learning & AI",
+          "qs_ranking": 1,
+          "the_ranking": 4
+        },
+        {
+          "degree_name": "PhD Computer Science (Deep Learning)",
+          "institution": "Stanford University",
+          "city": "Stanford",
+          "country": "USA",
+          "passing_year": 2020,
+          "grade_value": null,
+          "grade_metric": "GPA",
+          "field_of_study": "Deep Learning & Computer Vision",
+          "qs_ranking": 5,
+          "the_ranking": 4
+        }
+      ],
+      "experience": [
+        {
+          "job_title": "Teaching Assistant",
+          "company": "Stanford University - Computer Science Department",
+          "industry": "Education/Research",
+          "job_description": "Taught machine learning fundamentals to 150+ undergraduate students. Developed course materials and graded assignments.",
+          "start_date": "2018-09-01",
+          "end_date": "2020-05-31",
+          "duration_months": 20,
+          "location": "Stanford, California, USA"
+        },
+        {
+          "job_title": "Research Scientist - Deep Learning",
+          "company": "Google Brain",
+          "industry": "Technology/AI Research",
+          "job_description": "Developed novel deep learning architectures for natural language understanding. Led team of 8 researchers. Published 12 papers in top-tier venues.",
+          "start_date": "2020-06-15",
+          "end_date": "2022-12-31",
+          "duration_months": 30,
+          "location": "Mountain View, California, USA"
+        },
+        {
+          "job_title": "Senior Research Scientist",
+          "company": "OpenAI",
+          "industry": "AI/ML Research",
+          "job_description": "Leading research on large language models. Managing cross-functional team of 12 engineers. Contributed to GPT-4 development.",
+          "start_date": "2023-01-15",
+          "end_date": null,
+          "is_current": true,
+          "duration_months": 13,
+          "location": "San Francisco, California, USA"
+        }
+      ],
+      "skills": [
+        {
+          "skill_name": "Python",
+          "proficiency": "Expert",
+          "years_of_experience": 10
+        },
+        {
+          "skill_name": "Deep Learning (TensorFlow, PyTorch)",
+          "proficiency": "Expert",
+          "years_of_experience": 8
+        },
+        {
+          "skill_name": "Natural Language Processing",
+          "proficiency": "Expert",
+          "years_of_experience": 6
+        },
+        {
+          "skill_name": "Computer Vision",
+          "proficiency": "Advanced",
+          "years_of_experience": 5
+        },
+        {
+          "skill_name": "Research & Publication",
+          "proficiency": "Expert",
+          "years_of_experience": 8
+        },
+        {
+          "skill_name": "Team Leadership",
+          "proficiency": "Advanced",
+          "years_of_experience": 4
+        },
+        {
+          "skill_name": "Cloud Computing (AWS, GCP)",
+          "proficiency": "Advanced",
+          "years_of_experience": 6
+        }
+      ],
+      "certifications": [
+        {
+          "qualification_name": "Deep Learning Specialization",
+          "institution_name": "Coursera by Andrew Ng",
+          "passing_year": 2017,
+          "issuer": "Coursera"
+        },
+        {
+          "qualification_name": "Google Cloud Certified - ML Engineer",
+          "institution_name": "Google",
+          "passing_year": 2021,
+          "issuer": "Google Cloud"
+        }
+      ],
+      "awards": [
+        {
+          "award_type": "Best Paper Award",
+          "detail": "ACM Conference on Computer Vision 2019 - Novel CNN Architecture",
+          "year": 2019
+        },
+        {
+          "award_type": "Research Excellence Award",
+          "detail": "Stanford University Graduate Awards",
+          "year": 2020
+        }
+      ],
+      "research_outputs": [
+        {
+          "title": "Efficient Transformer Models for Low-Resource Languages",
+          "authors": "Ahmed Khan, Dr. John Smith, Prof. Lisa Anderson",
+          "publication": "ACL Proceedings (Association for Computational Linguistics)",
+          "output_type": "Conference Paper",
+          "publication_year": 2021,
+          "impact_factor": 4.5,
+          "citations": 150,
+          "doi": "10.18653/v1/acl2021.main.123",
+          "research_topics": ["NLP", "Transformers", "Language Models"]
+        },
+        {
+          "title": "Vision Transformers for Medical Image Analysis",
+          "authors": "Ahmed Khan, Dr. Robert Johnson, Prof. Sarah Williams",
+          "publication": "IEEE Transactions on Medical Imaging",
+          "output_type": "Journal Paper",
+          "publication_year": 2022,
+          "impact_factor": 5.2,
+          "citations": 87,
+          "doi": "10.1109/TMI.2022.3156789",
+          "research_topics": ["Computer Vision", "Medical AI", "Transformers"]
+        },
+        {
+          "title": "Scaling Language Models Efficiently",
+          "authors": "Ahmed Khan, Dr. Michael Chen, Prof. Jennifer Davis",
+          "publication": "NeurIPS Proceedings",
+          "output_type": "Conference Paper",
+          "publication_year": 2023,
+          "impact_factor": 5.8,
+          "citations": 45,
+          "doi": "10.48550/arXiv.2304.09999",
+          "research_topics": ["Large Language Models", "Efficiency", "Scaling"]
+        }
+      ],
+      "supervision": [
+        {
+          "role": "PhD Advisor",
+          "mentees": 5,
+          "focus_area": "Machine Learning and AI",
+          "duration": "2020-Present"
+        },
+        {
+          "role": "Mentor",
+          "mentees": 12,
+          "focus_area": "Research Publication & Career Development",
+          "duration": "2019-Present"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "candidates": {
+        "full_name": "Fatima Zahra Malik",
+        "email": "fatima.malik@example.com",
+        "phone_number": "+92-300-2345678",
+        "date_of_birth": "1995-08-22",
+        "nationality": "Pakistani",
+        "current_title": "Data Science Lead"
+      },
+      "education": [
+        {
+          "degree_name": "BS Mathematics & Statistics",
+          "institution": "University of the Punjab",
+          "city": "Lahore",
+          "country": "Pakistan",
+          "passing_year": 2016,
+          "grade_value": 3.75,
+          "grade_metric": "GPA",
+          "field_of_study": "Applied Mathematics",
+          "qs_ranking": 226,
+          "the_ranking": null
+        },
+        {
+          "degree_name": "MSc Data Science",
+          "institution": "Imperial College London",
+          "city": "London",
+          "country": "UK",
+          "passing_year": 2018,
+          "grade_value": 3.95,
+          "grade_metric": "GPA",
+          "field_of_study": "Statistical Machine Learning",
+          "qs_ranking": 3,
+          "the_ranking": 11
+        }
+      ],
+      "experience": [
+        {
+          "job_title": "Data Analyst",
+          "company": "DataInsights Pakistan",
+          "industry": "Business Analytics",
+          "job_description": "Analyzed business metrics, created dashboards, and provided data-driven insights for C-suite executives.",
+          "start_date": "2018-08-01",
+          "end_date": "2020-06-30",
+          "duration_months": 22,
+          "location": "Karachi, Pakistan"
+        },
+        {
+          "job_title": "Senior Data Scientist",
+          "company": "FinTech Solutions UK",
+          "industry": "Financial Technology",
+          "job_description": "Built predictive models for credit risk assessment, fraud detection, and customer churn prediction. Led analytics team of 6.",
+          "start_date": "2020-07-15",
+          "end_date": "2022-12-31",
+          "duration_months": 29,
+          "location": "London, UK"
+        },
+        {
+          "job_title": "Data Science Lead",
+          "company": "McKinsey & Company - AI Solutions",
+          "industry": "Management Consulting",
+          "job_description": "Leading data science initiatives for Fortune 500 clients. Managing team of 8 data scientists. Driving AI/ML adoption strategy.",
+          "start_date": "2023-01-10",
+          "end_date": null,
+          "is_current": true,
+          "duration_months": 15,
+          "location": "London, UK"
+        }
+      ],
+      "skills": [
+        {
+          "skill_name": "Python (Pandas, NumPy, Scikit-learn)",
+          "proficiency": "Expert",
+          "years_of_experience": 7
+        },
+        {
+          "skill_name": "SQL & Database Management",
+          "proficiency": "Expert",
+          "years_of_experience": 8
+        },
+        {
+          "skill_name": "Machine Learning & Statistical Modeling",
+          "proficiency": "Expert",
+          "years_of_experience": 6
+        },
+        {
+          "skill_name": "Data Visualization (Tableau, Power BI, Plotly)",
+          "proficiency": "Advanced",
+          "years_of_experience": 6
+        },
+        {
+          "skill_name": "Business Analytics & Insights",
+          "proficiency": "Expert",
+          "years_of_experience": 7
+        },
+        {
+          "skill_name": "Team Management",
+          "proficiency": "Advanced",
+          "years_of_experience": 4
+        },
+        {
+          "skill_name": "R Programming",
+          "proficiency": "Advanced",
+          "years_of_experience": 5
+        }
+      ],
+      "certifications": [
+        {
+          "qualification_name": "Google Analytics Professional",
+          "institution_name": "Google",
+          "passing_year": 2019,
+          "issuer": "Google"
+        },
+        {
+          "qualification_name": "Microsoft Certified: Data Scientist",
+          "institution_name": "Microsoft",
+          "passing_year": 2021,
+          "issuer": "Microsoft"
+        },
+        {
+          "qualification_name": "AWS Certified ML - Specialty",
+          "institution_name": "Amazon Web Services",
+          "passing_year": 2022,
+          "issuer": "AWS"
+        }
+      ],
+      "awards": [],
+      "research_outputs": [
+        {
+          "title": "Predictive Analytics for Financial Risk Assessment in Emerging Markets",
+          "authors": "Fatima Malik, Dr. Robert Williams",
+          "publication": "Journal of Financial Analytics",
+          "output_type": "Journal Paper",
+          "publication_year": 2021,
+          "impact_factor": 3.8,
+          "citations": 32,
+          "doi": "10.1016/j.jfa.2021.05.003",
+          "research_topics": ["Finance", "Risk Analytics", "Predictive Modeling"]
+        }
+      ],
+      "supervision": []
+    },
+    {
+      "id": 3,
+      "candidates": {
+        "full_name": "Muhammad Ali Iqbal",
+        "email": "m.ali.iqbal@example.com",
+        "phone_number": "+92-300-3456789",
+        "date_of_birth": "1994-03-10",
+        "nationality": "Pakistani",
+        "current_title": "IoT Solutions Architect"
+      },
+      "education": [
+        {
+          "degree_name": "BS Electronics Engineering",
+          "institution": "Ghulam Ishaq Khan Institute of Engineering Sciences & Technology",
+          "city": "Topi",
+          "country": "Pakistan",
+          "passing_year": 2015,
+          "grade_value": 3.65,
+          "grade_metric": "GPA",
+          "field_of_study": "Electronics & Communications",
+          "qs_ranking": null,
+          "the_ranking": null
+        }
+      ],
+      "experience": [
+        {
+          "job_title": "Hardware Engineer",
+          "company": "Embedded Systems Ltd",
+          "industry": "Electronics & IoT",
+          "job_description": "Designed and tested embedded systems for IoT applications. Developed firmware for microcontrollers. Led validation testing team.",
+          "start_date": "2015-07-01",
+          "end_date": "2018-12-31",
+          "duration_months": 42,
+          "location": "Islamabad, Pakistan"
+        },
+        {
+          "job_title": "Senior IoT Engineer",
+          "company": "SmartTech Solutions",
+          "industry": "Internet of Things",
+          "job_description": "Led IoT product development for smart home and industrial applications. Managed team of 6 engineers. Deployed 500+ IoT devices.",
+          "start_date": "2019-01-15",
+          "end_date": "2022-06-30",
+          "duration_months": 41,
+          "location": "Dubai, UAE"
+        },
+        {
+          "job_title": "IoT Solutions Architect",
+          "company": "Siemens IoT Division",
+          "industry": "Industrial IoT",
+          "job_description": "Architecting enterprise IoT solutions for manufacturing and utilities. Leading cross-functional teams of 12+ members across multiple regions.",
+          "start_date": "2022-07-01",
+          "end_date": null,
+          "is_current": true,
+          "duration_months": 21,
+          "location": "Munich, Germany"
+        }
+      ],
+      "skills": [
+        {
+          "skill_name": "Embedded Systems / C / C++",
+          "proficiency": "Expert",
+          "years_of_experience": 9
+        },
+        {
+          "skill_name": "IoT Architecture & Protocols (MQTT, CoAP, Zigbee)",
+          "proficiency": "Expert",
+          "years_of_experience": 7
+        },
+        {
+          "skill_name": "FPGA & Hardware Design",
+          "proficiency": "Advanced",
+          "years_of_experience": 6
+        },
+        {
+          "skill_name": "Python for IoT",
+          "proficiency": "Advanced",
+          "years_of_experience": 5
+        },
+        {
+          "skill_name": "Cloud Integration (AWS IoT, Azure IoT Hub)",
+          "proficiency": "Advanced",
+          "years_of_experience": 4
+        },
+        {
+          "skill_name": "PCB Design & Prototyping",
+          "proficiency": "Advanced",
+          "years_of_experience": 6
+        },
+        {
+          "skill_name": "Project & Team Management",
+          "proficiency": "Intermediate",
+          "years_of_experience": 4
+        }
+      ],
+      "certifications": [
+        {
+          "qualification_name": "Certified IoT Professional",
+          "institution_name": "IoT Council",
+          "passing_year": 2020,
+          "issuer": "IoT Council International"
+        },
+        {
+          "qualification_name": "AWS Certified IoT Developer",
+          "institution_name": "Amazon Web Services",
+          "passing_year": 2021,
+          "issuer": "AWS"
+        }
+      ],
+      "awards": [],
+      "research_outputs": [],
+      "supervision": []
+    },
+    {
+      "id": 4,
+      "candidates": {
+        "full_name": "Aisha Bibi Khan",
+        "email": null,
+        "phone_number": "+92-321-9876543",
+        "date_of_birth": "1997-11-05",
+        "nationality": "Pakistani",
+        "current_title": "Full Stack Developer"
+      },
+      "education": [
+        {
+          "degree_name": "BS Computer Science",
+          "institution": "Bahria University",
+          "city": "Rawalpindi",
+          "country": "Pakistan",
+          "passing_year": 2019,
+          "grade_value": 3.68,
+          "grade_metric": "GPA",
+          "field_of_study": "Computer Science",
+          "qs_ranking": null,
+          "the_ranking": null
+        }
+      ],
+      "experience": [
+        {
+          "job_title": "Junior Web Developer",
+          "company": "WebDev Startups",
+          "industry": "Software Development",
+          "job_description": "Developed responsive web applications using React and Node.js. Collaborated with UI/UX team. Maintained 15+ client projects.",
+          "start_date": "2019-07-01",
+          "end_date": "2021-06-30",
+          "duration_months": 24,
+          "location": "Karachi, Pakistan"
+        },
+        {
+          "job_title": "Full Stack Developer",
+          "company": "TechNova Solutions",
+          "industry": "Technology",
+          "job_description": "Developed full-stack web applications. Managed frontend (React) and backend (Node.js, Python Flask). Deployed to AWS.",
+          "start_date": "2021-07-15",
+          "end_date": null,
+          "is_current": true,
+          "duration_months": 33,
+          "location": "Dubai, UAE"
+        }
+      ],
+      "skills": [
+        {
+          "skill_name": "JavaScript / React",
+          "proficiency": "Advanced",
+          "years_of_experience": 5
+        },
+        {
+          "skill_name": "Node.js / Express",
+          "proficiency": "Advanced",
+          "years_of_experience": 4
+        },
+        {
+          "skill_name": "Python (Flask, Django)",
+          "proficiency": "Intermediate",
+          "years_of_experience": 2
+        },
+        {
+          "skill_name": "SQL / MongoDB",
+          "proficiency": "Intermediate",
+          "years_of_experience": 4
+        },
+        {
+          "skill_name": "HTML / CSS / Bootstrap",
+          "proficiency": "Advanced",
+          "years_of_experience": 5
+        },
+        {
+          "skill_name": "Git / Version Control",
+          "proficiency": "Advanced",
+          "years_of_experience": 4
+        },
+        {
+          "skill_name": "AWS / Cloud Deployment",
+          "proficiency": "Intermediate",
+          "years_of_experience": 2
+        }
+      ],
+      "certifications": [],
+      "awards": [],
+      "research_outputs": [],
+      "supervision": []
+    }
+  ]
+}

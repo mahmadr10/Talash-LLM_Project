@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TALASH - Analysis Results</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .analysis-tabs {
+            display: flex;
+            gap: 12px;
+            margin: 24px 0;
+            border-bottom: 1px solid #e0ddd7;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            padding: 12px 16px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: #7a7268;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .tab-btn.active {
+            color: #0f1b2d;
+            border-bottom-color: #0f1b2d;
+        }
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .analysis-box {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 16px 0;
+            box-shadow: 0 2px 8px rgba(18, 24, 38, 0.04);
+        }
+        .analysis-box h4 {
+            margin: 0 0 12px 0;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #0f1b2d;
+        }
+        .analysis-box p {
+            margin: 8px 0;
+            color: #5a5250;
+            line-height: 1.6;
+        }
+        .analysis-box ul {
+            margin: 12px 0;
+            padding-left: 20px;
+        }
+        .analysis-box li {
+            margin: 6px 0;
+            color: #5a5250;
+        }
+        .alert-box {
+            background: #fff3e6;
+            border-left: 4px solid #d4a574;
+            padding: 12px;
+            border-radius: 4px;
+            margin: 12px 0;
+        }
+        .email-draft {
+            background: #f5f2ee;
+            border: 1px solid #dbd5cc;
+            padding: 16px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            color: #3a3530;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .action-buttons {
+            margin-top: 16px;
+            display: flex;
+            gap: 8px;
+        }
+        .btn-secondary {
+            padding: 8px 12px;
+            border: 1px solid #dbd5cc;
+            background: transparent;
+            border-radius: 4px;
+            color: #0f1b2d;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-secondary:hover {
+            border-color: #0f1b2d;
+        }
+        .score-badge {
+            display: inline-block;
+            background: #0f1b2d;
+            color: #ffffff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        .skill-tag {
+            display: inline-block;
+            background: #f5f2ee;
+            color: #5a5250;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            margin: 2px 4px 2px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo">
+                <h1>TALASH</h1>
+                <p>ANALYTICAL LEDGER</p>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">DASHBOARD</a></li>
+                    <li class="active"><a href="candidates.html">CANDIDATES</a></li>
+                    <li><a href="reports.html">REPORTS</a></li>
+                    <li><a href="settings.html">SETTINGS</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header>
+                <div class="search-bar">
+                    <input type="text" placeholder="SEARCH CANDIDATES...">
+                </div>
+                <div class="user-profile">
+                    <div class="profile">
+                        <span>PROFILE</span>
+                        <img src="https://via.placeholder.com/30" alt="User Avatar">
+                    </div>
+                </div>
+            </header>
+
+            <div class="dashboard-header">
+                <nav>
+                    <ul>
+                        <li><a href="index.html">DASHBOARD</a></li>
+                        <li><a href="candidates.html">CANDIDATES</a></li>
+                        <li><a href="reports.html">REPORTS</a></li>
+                        <li><a href="settings.html">SETTINGS</a></li>
+                    </ul>
+                </nav>
+                <div class="upload-cv-sidebar">
+                    <label for="cv-upload-input" class="btn-secondary">UPLOAD CV</label>
+                    <input type="file" id="cv-upload-input" style="display: none;">
+                </div>
+            <div class="analysis-box">
+                <h4>Candidate Information</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div>
+                        <p><strong>Name:</strong> Ahmed Khan</p>
+                        <p><strong>Email:</strong> ahmed.khan@example.com</p>
+                        <p><strong>Phone:</strong> +92-300-1234567</p>
+                    </div>
+                    <div>
+                        <p><strong>Analysis Date:</strong> 2024-01-26</p>
+                        <p><strong>Profile Status:</strong> <span class="score-badge">COMPLETE</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="analysis-tabs">
+                <button class="tab-btn active" onclick="switchTab('education')">Educational Profile</button>
+                <button class="tab-btn" onclick="switchTab('experience')">Professional Experience</button>
+                <button class="tab-btn" onclick="switchTab('skills')">Skill Alignment</button>
+                <button class="tab-btn" onclick="switchTab('missing')">Missing Information</button>
+            </div>
+
+            <!-- TAB 1: Educational Profile Analysis -->
+            <div id="education" class="tab-content active">
+                <div class="analysis-box">
+                    <h4>Educational Profile Analysis</h4>
+                    
+                    <div style="margin: 16px 0;">
+                        <h5 style="color: #0f1b2d; font-weight: 600; margin-bottom: 8px;">Highest Qualification</h5>
+                        <p><strong>MS Computer Science</strong> from <strong>MIT</strong> (2020)</p>
+                    </div>
+
+                    <div style="margin: 16px 0;">
+                        <h5 style="color: #0f1b2d; font-weight: 600; margin-bottom: 8px;">Institution Quality Assessment</h5>
+                        <p>2 out of 2 degrees are from ranked institutions</p>
+                        <ul>
+                            <li><strong>BS Computer Science</strong> - NUST [QS Rank: 200]</li>
+                            <li><strong>MS Computer Science</strong> - MIT [QS Rank: 1, THE Rank: 2]</li>
+                        </ul>
+                    </div>
+
+                    <div style="margin: 16px 0;">
+                        <h5 style="color: #0f1b2d; font-weight: 600; margin-bottom: 8px;">Educational Gaps</h5>
+                        <p>✓ No significant educational gaps detected</p>
+                        <p style="font-size: 12px; color: #7a7268;">Timeline: BS (2018) → MS (2020) - 2 year progression is reasonable</p>
+                    </div>
+
+                    <div class="alert-box">
+                        <strong>Assessment:</strong> Excellent educational background with prestigious institutions and consistent progression. Strong institutional prestige indicators.
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: Professional Experience Analysis -->
+            <div id="experience" class="tab-content">
+                <div class="analysis-box">
+                    <h4>Professional Experience Analysis</h4>
+
+                    <div style="margin: 16px 0;">
+                        <h5 style="color: #0f1b2d; font-weight: 600; margin-bottom: 8px;">Employment Timeline</h5>
+                        <ul>
+                            <li><strong>Junior Software Engineer</strong> at TechCorp Pakistan (Jun 2020 - Dec 2021) — 18 months</li>
+                            <li><strong>Senior Systems Engineer</strong> at CloudSystems Inc (Jan 2022 - Present) — 24 months</li>
+                        </ul>
+                    </div>
+
+                    <div style="margin: 16px 0;">
+                        <h5 style="color: #0f1b2d; font-weight: 600; margin-bottom: 8px;">Timeline Consistency</h5>
+                        <p>✓ No job overlaps detected</p>
+                        <p>✓ No significant professional gaps detected</p>
+                        <p style="font-size: 12px; color: #7a7268;">Transition from Junior to Senior role shows promotion/career progression</p>
+                    </div>
+
+                    <div style="margin: 16px 0;">
+                        <h5 style="color: #0f1b2d; font-weight: 600; margin-bottom: 8px;">Career Progression</h5>
+                        <p>• Started as Junior Software Engineer (technical IC)</p>
+                        <p>• Advanced to Senior Systems Engineer (leadership potential)</p>
+                        <p>• Currently leading team of 5 engineers</p>
+                    </div>
+
+                    <div class="alert-box">
+                        <strong>Assessment:</strong> Clear career trajectory with demonstrated growth. Currently employed in a senior capacity with team leadership experience.
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: Skill Alignment -->
+            <div id="skills" class="tab-content">
+                <div class="analysis-box">
+                    <h4>Skill Alignment Analysis</h4>
+
+                    <div style="margin: 16px 0;">
+                        <h5 style="color: #0f1b2d; font-weight: 600; margin-bottom: 8px;">Claimed Skills</h5>
+                        <div>
+                            <span class="skill-tag">Python</span>
+                            <span class="skill-tag">SQL</span>
+                            <span class="skill-tag">AWS</span>
+                            <span class="skill-tag">Docker</span>
+                            <span class="skill-tag">Research</span>
+                            <span class="skill-tag">Machine Learning</span>
+                            <span class="skill-tag">System Design</span>
+                        </div>
+                    </div>
+
+                    <div style="margin: 16px 0;">
+                        <h5 style="color: #0f1b2d; font-weight: 600; margin-bottom: 8px;">Skills-Experience Alignment</h5>
+                        <p><strong>Alignment Ratio: 85.7%</strong></p>
+                        <p style="font-size: 12px; color: #7a7268;">Evidence found for: Python, SQL, AWS, Research, System Design (5 out of 7 skills)</p>
+                    </div>
+
+                    <div style="margin: 16px 0;">
+                        <h5 style="color: #0f1b2d; font-weight: 600; margin-bottom: 8px;">Evidence from Experience</h5>
+                        <ul>
+                            <li><strong>Systems Engineer</strong> role aligns well with: AWS, System Design, Architecture</li>
+                            <li><strong>Research Publications:</strong> 2 publications demonstrate research skill</li>
+                            <li><strong>Technical Stack:</strong> Cloud systems work validates SQL, Python, Docker expertise</li>
+                        </ul>
+                    </div>
+
+                    <div class="alert-box">
+                        <strong>Assessment:</strong> Strong skills-to-experience alignment. Most claimed technical skills are well-supported by work experience and publications.
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: Missing Information & Email Draft -->
+            <div id="missing" class="tab-content">
+                <div class="analysis-box">
+                    <h4>Data Completeness Check</h4>
+                    <p style="color: #0f1b2d; font-weight: 600; margin-bottom: 12px;">✓ Status: No critical information missing</p>
+                    <p style="font-size: 12px; color: #7a7268;">All essential fields are present: Email, Phone, Education, Experience, Skills.</p>
+                </div>
+
+                <div class="analysis-box">
+                    <h4>Personalized Draft Email - Missing Information</h4>
+                    <p style="font-size: 12px; color: #7a7268; margin-bottom: 12px;">Auto-generated draft for cases where information is incomplete:</p>
+                    
+                    <div class="email-draft">Dear Ahmed Khan,
+
+Thank you for your interest in our recruitment program. We are currently reviewing your application materials and noticed that the following information is missing or incomplete in your CV:
+
+- Certifications/Awards details
+- Publications DOI numbers
+- References contact information
+
+Could you please provide the missing details or upload an updated CV at your earliest convenience? This will help us complete your profile and proceed to the next evaluation stage.
+
+If you have any questions or need assistance, please don't hesitate to reach out to our HR team.
+
+Best regards,
+TALASH Recruitment Team
+recruitment@talash.com</div>
+
+                    <div class="action-buttons">
+                        <button class="btn-secondary" onclick="copyToClipboard()">Copy Email</button>
+                        <button class="btn-secondary" onclick="sendEmail()">Send Email</button>
+                        <button class="btn-secondary" onclick="exportAnalysis()">Export Analysis</button>
+                    </div>
+                </div>
+
+                <div class="analysis-box">
+                    <h4>Data Quality Metrics</h4>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                        <div>
+                            <p style="font-size: 12px; color: #7a7268; margin: 0;">Profile Completeness</p>
+                            <p style="font-size: 20px; font-weight: 700; color: #0f1b2d; margin: 4px 0;">95%</p>
+                        </div>
+                        <div>
+                            <p style="font-size: 12px; color: #7a7268; margin: 0;">With Research Output</p>
+                            <p style="font-size: 20px; font-weight: 700; color: #0f1b2d; margin: 4px 0;">✓ Yes</p>
+                        </div>
+                        <div>
+                            <p style="font-size: 12px; color: #7a7268; margin: 0;">Experience Count</p>
+                            <p style="font-size: 20px; font-weight: 700; color: #0f1b2d; margin: 4px 0;">2 Roles</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            // Hide all tab contents
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+
+            // Remove active class from all buttons
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function copyToClipboard() {
+            const emailText = document.querySelector('.email-draft').textContent;
+            navigator.clipboard.writeText(emailText).then(() => {
+                alert('Email draft copied to clipboard!');
+            });
+        }
+
+        function sendEmail() {
+            alert('In production, this would send the email via SMTP server. Demo functionality only.');
+        }
+
+        function exportAnalysis() {
+            const analysis = {
+                candidate: 'Ahmed Khan',
+                date: new Date().toISOString(),
+                analyses: {
+                    education: 'Excellent institutional quality',
+                    experience: 'Clear career progression',
+                    skills: '85.7% alignment',
+                    completeness: '95%'
+                }
+            };
+            
+            const dataStr = JSON.stringify(analysis, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `analysis_${analysis.candidate}_${new Date().getTime()}.json`;
+            link.click();
+        }
+    </script>
+</body>
+</html>

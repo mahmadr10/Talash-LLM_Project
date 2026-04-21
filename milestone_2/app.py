@@ -18,12 +18,22 @@ from cv_batch_processor import CVBatchProcessor, parse_cv_text_to_structured as 
 
 # Flask App Configuration
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'uploads'
+
+def _runtime_data_dir(dirname):
+    """Use /tmp on serverless runtimes where project directory is read-only."""
+    if os.getenv('VERCEL'):
+        return os.path.join('/tmp', dirname)
+    return dirname
+
+
+app.config['UPLOAD_FOLDER'] = _runtime_data_dir('uploads')
+app.config['OUTPUT_FOLDER'] = _runtime_data_dir('outputs')
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max file
 ALLOWED_EXTENSIONS = {'pdf'}
 
 # Create uploads directory if it doesn't exist
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+os.makedirs(app.config['OUTPUT_FOLDER'], exist_ok=True)
 
 def load_candidate_database(sample_file='sample_cv_data.json'):
     """Load in-memory candidate data from sample JSON for milestone demo."""
@@ -130,7 +140,7 @@ def get_candidates():
 @app.route('/api/ingest-folder', methods=['POST'])
 def ingest_folder():
     """Run folder-based CV ingestion pipeline from uploads directory."""
-    processor = CVBatchProcessor(app.config['UPLOAD_FOLDER'], 'outputs')
+    processor = CVBatchProcessor(app.config['UPLOAD_FOLDER'], app.config['OUTPUT_FOLDER'])
     results = processor.process_folder()
     report = processor.generate_report()
 

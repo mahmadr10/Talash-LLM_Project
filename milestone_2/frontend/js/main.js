@@ -13,8 +13,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+const API_BASE = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') && window.location.port === '5500'
+    ? 'http://127.0.0.1:5000'
+    : '';
+
+function apiUrl(path) {
+    return `${API_BASE}${path}`;
+}
+
 async function apiGet(url) {
-    const response = await fetch(url);
+    const response = await fetch(apiUrl(url));
     return parseApiResponse(response);
 }
 
@@ -60,7 +68,7 @@ function bindUpload(inputId) {
         formData.append('file', file);
 
         try {
-            const response = await fetch('/api/upload', {
+            const response = await fetch(apiUrl('/api/upload'), {
                 method: 'POST',
                 body: formData
             });

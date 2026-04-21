@@ -114,10 +114,31 @@ def index():
     """Serve frontend login page"""
     return send_file('frontend/login.html')
 
+@app.route('/<path:filename>')
+def serve_frontend_pages(filename):
+    """Serve top-level frontend HTML files like index.html, reports.html, etc."""
+    if filename.endswith('.html'):
+        target = Path('frontend') / filename
+        if target.exists():
+            return send_file(str(target))
+    return jsonify({'error': 'Not found'}), 404
+
 @app.route('/frontend/<path:filename>')
 def serve_frontend(filename):
     """Serve frontend files"""
     return send_file(f'frontend/{filename}')
+
+
+@app.route('/css/<path:filename>')
+def serve_frontend_css(filename):
+    """Serve CSS assets for pages loaded from root routes."""
+    return send_file(f'frontend/css/{filename}')
+
+
+@app.route('/js/<path:filename>')
+def serve_frontend_js(filename):
+    """Serve JS assets for pages loaded from root routes."""
+    return send_file(f'frontend/js/{filename}')
 
 @app.route('/api/candidates', methods=['GET'])
 def get_candidates():

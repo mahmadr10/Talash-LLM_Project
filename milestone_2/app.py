@@ -35,26 +35,100 @@ ALLOWED_EXTENSIONS = {'pdf'}
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['OUTPUT_FOLDER'], exist_ok=True)
 
-def load_candidate_database(sample_file='sample_cv_data.json'):
-    """Load in-memory candidate data from sample JSON for milestone demo."""
-    if not os.path.exists(sample_file):
+def load_candidate_database(extraction_file='outputs/cv_extraction_results.json'):
+    """Load candidate database from extracted CV results JSON.
+    
+    Loads from cv_extraction_results.json (batch extraction output).
+    Each extraction result is converted to a candidate record with auto-incrementing IDs.
+    """
+    if not os.path.exists(extraction_file):
+        print(f"[DATABASE] No extraction results found at {extraction_file}")
         return {}
 
-    with open(sample_file, 'r', encoding='utf-8') as f:
-        payload = json.load(f)
-
-    candidates = payload.get('candidates', [])
-    mapped = {}
-    for candidate in candidates:
-        cid = candidate.get('candidates', {}).get('id')
-        if cid is not None:
-            mapped[int(cid)] = candidate
-    return mapped
+    try:
+        with open(extraction_file, 'r', encoding='utf-8') as f:
+            extraction_results = json.load(f)
+        
+        # extraction_results is an array of extraction objects
+        mapped = {}
+        next_id = 1
+        
+        for result in extraction_results:
+            structured = result.get('structured_extraction', {})
+            if not structured:
+                continue
+            
+            # Build candidate record from structured extraction
+            candidate_dict = {
+                'candidates': {
+                    'id': next_id,
+                    'full_name': structured.get('name') or f'Candidate {next_id}',
+                    'email': structured.get('email', ''),
+                    'phone_number': structured.get('phone_number', '')
+                },
+                'education': structured.get('education', []),
+                'experience': structured.get('experience', []),
+                'skills': structured.get('skills', []),
+                'research_outputs': structured.get('research_outputs', []),
+                'supervision': structured.get('supervision', []),
+                'certifications': structured.get('certifications', [])
+            }
+            
+            mapped[next_id] = candidate_dict
+            next_id += 1
+        
+        print(f"[DATABASE] Loaded {len(mapped)} candidates from {extraction_file}")
+        return mapped
+    except Exception as e:
+        print(f"[DATABASE] Error loading from {extraction_file}: {str(e)}")
+        return {}
 
 
 def parse_cv_text_to_structured(raw_text, fallback_name):
     """Backward-compatible wrapper around the shared parser."""
     return shared_parse_cv_text_to_structured(raw_text, fallback_name)
+
+
+def save_analysis_result(candidate_id, analysis_data, filename='outputs/analysis_results.json'):
+    """Save analysis result for a candidate to persistent storage."""
+    try:
+        # Load existing results
+        results = {}
+        if os.path.exists(filename):
+            try:
+                with open(filename, 'r', encoding='utf-8') as f:
+                    results = json.load(f)
+            except:
+                results = {}
+        
+        # Update with new analysis
+        results[str(candidate_id)] = analysis_data
+        
+        # Save back
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        with open(filename, 'w', encoding='utf-8') as f:
+            json.dump(results, f, indent=2, ensure_ascii=False)
+        
+        print(f"[ANALYSIS] Saved analysis for candidate {candidate_id} to {filename}")
+        return True
+    except Exception as e:
+        print(f"[ANALYSIS] Error saving analysis: {str(e)}")
+        return False
+
+
+def load_analysis_result(candidate_id, filename='outputs/analysis_results.json'):
+    """Load cached analysis result for a candidate."""
+    try:
+        if not os.path.exists(filename):
+            return None
+        
+        with open(filename, 'r', encoding='utf-8') as f:
+            results = json.load(f)
+        
+        return results.get(str(candidate_id))
+    except Exception as e:
+        print(f"[ANALYSIS] Error loading analysis: {str(e)}")
+        return None
 
 
 # In-memory candidate database (for demo purposes)
@@ -160,23 +234,97 @@ def get_candidates():
 
 @app.route('/api/ingest-folder', methods=['POST'])
 def ingest_folder():
-    """Run folder-based CV ingestion pipeline from uploads directory."""
+    """Run folder-based CV ingestion pipeline from uploads directory and integrate results into candidate database.
+    
+    Now supports multi-candidate PDFs: single PDF with 43 candidates generates 43 database entries.
+    """
     processor = CVBatchProcessor(app.config['UPLOAD_FOLDER'], app.config['OUTPUT_FOLDER'])
     results = processor.process_folder()
     report = processor.generate_report()
 
+    # Use already-extracted structured data from processor
     structured_results = []
-    for idx, item in enumerate(results, start=1):
-        parsed = parse_cv_text_to_structured(item.get('raw_text', ''), Path(item.get('filename', f'candidate_{idx}')).stem)
+    for item in results:
         structured_results.append({
             'filename': item.get('filename'),
             'status': item.get('status'),
-            'structured_extraction': parsed
+            'structured_extraction': item.get('structured_extraction', {})
         })
 
     output_path = processor.save_results()
+    
+    # ===== Add extracted candidates to candidate_database =====
+    added_candidates = []
+    next_id = max(candidate_database.keys(), default=0) + 1
+    
+    print(f"\n[BATCH PROCESSING] Starting to add {len(structured_results)} candidates to database...")
+    print(f"[BATCH PROCESSING] Starting ID: {next_id}")
+    print(f"[BATCH PROCESSING] {len(results)} PDF file(s) generated {len(structured_results)} candidate record(s)")
+    
+    for result in structured_results:
+        try:
+            extracted = result.get('structured_extraction', {})
+            
+            # Skip if extraction failed (no structured data)
+            if not extracted or not extracted.get('name'):
+                print(f"[BATCH PROCESSING] ⚠ Skipping {result.get('filename')} - extraction failed")
+                continue
+            
+            # Create candidate dict matching schema from sample_cv_data.json
+            candidate_dict = {
+                'candidates': {
+                    'id': next_id,
+                    'full_name': extracted.get('name') or f'Uploaded Candidate {next_id}',
+                    'email': extracted.get('email', ''),
+                    'phone_number': extracted.get('phone_number', '')
+                },
+                'education': extracted.get('education', []),
+                'experience': extracted.get('experience', []),
+                'skills': extracted.get('skills', []),
+                'research_outputs': extracted.get('research_outputs', []),
+                'supervision': extracted.get('supervision', []),
+                'certifications': extracted.get('certifications', [])
+            }
+            
+            # Add to global candidate_database
+            candidate_database[next_id] = candidate_dict
+            
+            # Track what was added
+            added_candidates.append({
+                'id': next_id,
+                'name': candidate_dict['candidates']['full_name'],
+                'email': candidate_dict['candidates']['email'],
+                'filename': result.get('filename'),
+                'education_count': len(candidate_dict['education']),
+                'experience_count': len(candidate_dict['experience']),
+                'skills_count': len(candidate_dict['skills'])
+            })
+            
+            print(f"[BATCH PROCESSING] ✓ ID {next_id}: {candidate_dict['candidates']['full_name']} added")
+            next_id += 1
+            
+        except Exception as e:
+            print(f"[BATCH PROCESSING] ✗ Error adding candidate: {str(e)}")
+            continue
+    
+    print(f"[BATCH PROCESSING] Complete: Added {len(added_candidates)} candidates to database")
+    print(f"[BATCH PROCESSING] Total candidates now in database: {len(candidate_database)}\n")
+    
     return jsonify({
         'status': 'success',
+        'batch_processing': {
+            'files_processed': len(results),
+            'successful_extractions': len(structured_results),
+            'added_to_database': len(added_candidates),
+            'failed_count': len(results) - len(added_candidates)
+        },
+        'added_candidates': added_candidates,
+        'database_summary': {
+            'total_candidates': len(candidate_database),
+            'new_candidate_ids': [c['id'] for c in added_candidates],
+            'first_new_id': added_candidates[0]['id'] if added_candidates else None,
+            'last_new_id': added_candidates[-1]['id'] if added_candidates else None
+        },
         'report': report,
         'output_file': output_path,
         'structured_results': structured_results
@@ -388,6 +536,9 @@ def get_analysis_output(candidate_id):
             'missing_information': results.get('missing_information', {}),
             'candidate_summary': results.get('candidate_summary', {}),
         }
+        
+        # Save analysis result to file for persistence
+        save_analysis_result(candidate_id, formatted)
         
         return jsonify(formatted)
     except Exception as e:

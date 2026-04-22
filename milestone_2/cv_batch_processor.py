@@ -18,9 +18,10 @@ except ImportError:
     genai = None
 
 
-GEMINI_MODEL_NAME = os.getenv('GEMINI_MODEL_NAME', 'gemini-1.5-flash')
+GEMINI_MODEL_NAME = os.getenv('GEMINI_MODEL_NAME', 'gemini-3.1-flash-lite-preview')
 GEMINI_ENABLED = os.getenv('TALASH_DISABLE_GEMINI', '').strip().lower() not in {'1', 'true', 'yes'}
 _GEMINI_CONFIGURED = False
+MAX_CANDIDATES_PER_PDF = 3  # Limit batch processing to first N candidates per PDF to avoid rate limits
 
 UNIVERSITY_MAP = {
     'nust': 'National University of Sciences and Technology',
@@ -321,16 +322,29 @@ def _configure_gemini():
     """Configure Gemini once if the package and API key are available."""
     global _GEMINI_CONFIGURED
 
-    if not GEMINI_ENABLED or genai is None:
+    if not GEMINI_ENABLED:
+        print(f"[GEMINI] ✗ Gemini is disabled (TALASH_DISABLE_GEMINI env var set)")
+        return False
+    
+    if genai is None:
+        print(f"[GEMINI] ✗ google.generativeai package not imported")
         return False
 
     api_key = os.getenv('GEMINI_API_KEY')
     if not api_key:
+        print(f"[GEMINI] ✗ GEMINI_API_KEY environment variable not set")
         return False
+    
+    print(f"[GEMINI] ✓ API key found (length: {len(api_key)})")
 
     if not _GEMINI_CONFIGURED:
-        genai.configure(api_key=api_key)
-        _GEMINI_CONFIGURED = True
+        try:
+            genai.configure(api_key=api_key)
+            _GEMINI_CONFIGURED = True
+            print(f"[GEMINI] ✓ Configured with model: {GEMINI_MODEL_NAME}")
+        except Exception as e:
+            print(f"[GEMINI] ✗ Configuration failed: {str(e)}")
+            return False
 
     return True
 
@@ -380,28 +394,63 @@ def _normalize_structured_extraction(payload, fallback_name):
     }
 
 
-def _candidate_text_chunk(raw_text):
-    """Mirror notebook behavior for noisy PDFs while still supporting single-CV files."""
+def _extract_all_candidate_chunks(raw_text):
+    """Extract candidate chunks from a multi-candidate PDF (limited to first MAX_CANDIDATES_PER_PDF).
+    
+    Returns a list of (chunk_text, index) tuples, one per candidate.
+    If no delimiter found, returns entire text as single chunk.
+    Limited to MAX_CANDIDATES_PER_PDF to avoid rate limit issues.
+    """
     text = (raw_text or '').replace('\x00', ' ')
     text = re.sub(r'\s+', ' ', text).strip()
 
+    # Split by "Candidate for the post of" delimiter (case-insensitive)
     raw_chunks = re.split(r'(?i)candidate for the post of', text)
-    chunks = ['Candidate for the post of ' + c.strip() for c in raw_chunks if len(c.strip()) > 500]
-    if chunks:
-        return chunks[0][:10000]
+    
+    # Filter and format chunks - keep those with at least 500 chars
+    chunks = []
+    for i, c in enumerate(raw_chunks):
+        # Stop if we've reached the max candidates
+        if len(chunks) >= MAX_CANDIDATES_PER_PDF:
+            print(f"[EXTRACTION] Limiting to {MAX_CANDIDATES_PER_PDF} candidates per PDF. Total found: {len(raw_chunks) - 1}")
+            break
+        
+        chunk_text = c.strip()
+        if len(chunk_text) > 500:
+            # Add delimiter back to all except first (which had no delimiter originally)
+            if i > 0:
+                chunk_text = 'Candidate for the post of ' + chunk_text
+            chunks.append((chunk_text[:10000], i))  # Cap at 10k chars per chunk
+    
+    # If no chunks found via delimiter, return entire text as single chunk
+    if not chunks:
+        return [(text[:10000], 0)]
+    
+    return chunks
 
-    return text[:10000]
+
+def _candidate_text_chunk(raw_text):
+    """Mirror notebook behavior for noisy PDFs while still supporting single-CV files.
+    
+    DEPRECATED: Use _extract_all_candidate_chunks() for multi-candidate support.
+    Returns only the first chunk for backward compatibility.
+    """
+    chunks = _extract_all_candidate_chunks(raw_text)
+    return chunks[0][0] if chunks else raw_text[:10000]
 
 
 def _extract_with_gemini(raw_text, fallback_name):
     """Use Gemini to convert CV text into structured JSON."""
     if not _configure_gemini():
+        print(f"[GEMINI] ✗ Gemini not configured (API key missing?)")
         return None
 
     cv_chunk = _candidate_text_chunk(raw_text)
     prompt = f"{SYSTEM_PROMPT}\n\nPreferred candidate name: {fallback_name}\n\nCV TEXT:\n{cv_chunk}"
 
     model = genai.GenerativeModel(GEMINI_MODEL_NAME)
+    print(f"[GEMINI] → Calling {GEMINI_MODEL_NAME} for: {fallback_name}")
+    
     max_attempts = 4
     for attempt in range(max_attempts):
         try:
@@ -416,15 +465,18 @@ def _extract_with_gemini(raw_text, fallback_name):
             parsed = _parse_json_payload(response_text)
             if isinstance(parsed, dict):
                 parsed['gemini_used'] = True
+                print(f"[GEMINI] ✓ Successfully extracted via Gemini")
                 return _normalize_structured_extraction(parsed, fallback_name)
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as e:
+            print(f"[GEMINI] ✗ Attempt {attempt + 1}/{max_attempts} - JSON decode error: {str(e)[:100]}")
             time.sleep(2 + attempt)
             continue
-        except Exception:
-            # Retry transient API/model issues with a small backoff.
+        except Exception as e:
+            print(f"[GEMINI] ✗ Attempt {attempt + 1}/{max_attempts} - {type(e).__name__}: {str(e)[:100]}")
             time.sleep(2 + attempt)
             continue
 
+    print(f"[GEMINI] ✗ Failed after {max_attempts} attempts, falling back to rule-based")
     return None
 
 
@@ -500,25 +552,48 @@ class CVBatchProcessor:
         return self.results
 
     def process_single_cv(self, filepath):
-        """Process a single CV file"""
+        """Process a single CV file (may contain multiple candidates).
+        
+        If PDF contains multiple candidates (separated by 'Candidate for the post of'),
+        each is processed separately and added as individual results.
+        """
         try:
             extracted_text = self.extract_text_from_pdf(str(filepath))
-            structured = parse_cv_text_to_structured(extracted_text, filepath.stem)
-
-            result = {
-                'filename': filepath.name,
-                'extraction_date': datetime.now().isoformat(),
-                'raw_text': extracted_text[:1000],
-                'status': 'extracted',
-                'structured_extraction': structured
-            }
-
-            self.results.append(result)
-            print('  ✓ Extracted successfully')
-            return result
+            chunks = _extract_all_candidate_chunks(extracted_text)
+            
+            file_stem = filepath.stem
+            total_chunks = len(chunks)
+            
+            # Process each candidate chunk
+            for chunk_text, chunk_index in chunks:
+                try:
+                    # Generate candidate name: if multiple chunks, suffix with _01, _02, etc.
+                    if total_chunks > 1:
+                        candidate_name = f"{file_stem}_candidate_{chunk_index + 1:02d}"
+                    else:
+                        candidate_name = file_stem
+                    
+                    structured = parse_cv_text_to_structured(chunk_text, candidate_name)
+                    
+                    result = {
+                        'filename': filepath.name if total_chunks == 1 else f"{file_stem}_candidate_{chunk_index + 1:02d}.pdf",
+                        'extraction_date': datetime.now().isoformat(),
+                        'raw_text': chunk_text[:1000],
+                        'status': 'extracted',
+                        'structured_extraction': structured
+                    }
+                    
+                    self.results.append(result)
+                    print(f'  ✓ Candidate {chunk_index + 1}/{total_chunks} extracted successfully')
+                    
+                except Exception as e:
+                    print(f'  ✗ Candidate {chunk_index + 1}/{total_chunks} error: {str(e)}')
+                    continue
+            
+            return self.results if total_chunks > 0 else None
 
         except Exception as e:
-            print(f'  ✗ Error: {str(e)}')
+            print(f'  ✗ Error processing file: {str(e)}')
             return None
 
     def save_results(self, filename='cv_extraction_results.json'):

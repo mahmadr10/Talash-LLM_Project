@@ -67,13 +67,6 @@
             margin: 6px 0;
             color: #5a5250;
         }
-        .alert-box {
-            background: #fff3e6;
-            border-left: 4px solid #d4a574;
-            padding: 12px;
-            border-radius: 4px;
-            margin: 12px 0;
-        }
         .email-draft {
             background: #f5f2ee;
             border: 1px solid #dbd5cc;
@@ -114,15 +107,6 @@
             border-radius: 4px;
             font-weight: 600;
             font-size: 12px;
-        }
-        .skill-tag {
-            display: inline-block;
-            background: #f5f2ee;
-            color: #5a5250;
-            padding: 4px 8px;
-            border-radius: 3px;
-            font-size: 11px;
-            margin: 2px 4px 2px 0;
         }
     </style>
 </head>
@@ -169,17 +153,19 @@
                 </div>
                 <a class="btn-primary" href="candidates.html">Back to candidates</a>
             </div>
+
+            <!-- Candidate Info Box - DYNAMICALLY LOADED ONLY -->
             <div class="analysis-box">
                 <h4>Candidate Information</h4>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                     <div>
-                        <p><strong>Name:</strong> <span id="candidateName">Ahmed Khan</span></p>
-                        <p><strong>Email:</strong> <span id="candidateEmail">ahmed.khan@example.com</span></p>
-                        <p><strong>Phone:</strong> <span id="candidatePhone">+92-300-1234567</span></p>
+                        <p><strong>Name:</strong> <span id="candidateName">Loading...</span></p>
+                        <p><strong>Email:</strong> <span id="candidateEmail">Loading...</span></p>
+                        <p><strong>Phone:</strong> <span id="candidatePhone">Loading...</span></p>
                     </div>
                     <div>
-                        <p><strong>Analysis Date:</strong> 2024-01-26</p>
-                        <p><strong>Profile Status:</strong> <span class="score-badge">COMPLETE</span></p>
+                        <p><strong>Analysis Date:</strong> <span id="analysisDate">Loading...</span></p>
+                        <p><strong>Profile Status:</strong> <span class="score-badge" id="profileStatus">LOADING</span></p>
                     </div>
                 </div>
             </div>
@@ -195,206 +181,68 @@
             <!-- TAB 1: Educational Profile Analysis -->
             <div id="education" class="tab-content active">
                 <div class="analysis-box">
-                    <h4>Educational Profile Analysis</h4>
-                    
-                    <div style="margin: 16px 0;">
-                        <h5 style="color: #0f1b2d; font-weight: 600; margin-bottom: 8px;">Highest Qualification</h5>
-                        <p><strong>MS Computer Science</strong> from <strong>MIT</strong> (2020)</p>
-                    </div>
-
-                    <div style="margin: 16px 0;">
-                        <h5 style="color: #0f1b2d; font-weight: 600; margin-bottom: 8px;">Institution Quality Assessment</h5>
-                        <p>2 out of 2 degrees are from ranked institutions</p>
-                        <ul>
-                            <li><strong>BS Computer Science</strong> - NUST [QS Rank: 200]</li>
-                            <li><strong>MS Computer Science</strong> - MIT [QS Rank: 1, THE Rank: 2]</li>
-                        </ul>
-                    </div>
-
-                    <div style="margin: 16px 0;">
-                        <h5 style="color: #0f1b2d; font-weight: 600; margin-bottom: 8px;">Educational Gaps</h5>
-                        <p>✓ No significant educational gaps detected</p>
-                        <p style="font-size: 12px; color: #7a7268;">Timeline: BS (2018) → MS (2020) - 2 year progression is reasonable</p>
-                    </div>
-
-                    <div class="alert-box">
-                        <strong>Assessment:</strong> Excellent educational background with prestigious institutions and consistent progression. Strong institutional prestige indicators.
-                    </div>
+                    <p>Loading educational data...</p>
                 </div>
             </div>
 
             <!-- TAB 2: Professional Experience Analysis -->
             <div id="experience" class="tab-content">
                 <div class="analysis-box">
-                    <h4>Professional Experience Analysis</h4>
-
-                    <div style="margin: 16px 0;">
-                        <h5 style="color: #0f1b2d; font-weight: 600; margin-bottom: 8px;">Employment Timeline</h5>
-                        <ul>
-                            <li><strong>Junior Software Engineer</strong> at TechCorp Pakistan (Jun 2020 - Dec 2021) — 18 months</li>
-                            <li><strong>Senior Systems Engineer</strong> at CloudSystems Inc (Jan 2022 - Present) — 24 months</li>
-                        </ul>
-                    </div>
-
-                    <div style="margin: 16px 0;">
-                        <h5 style="color: #0f1b2d; font-weight: 600; margin-bottom: 8px;">Timeline Consistency</h5>
-                        <p>✓ No job overlaps detected</p>
-                        <p>✓ No significant professional gaps detected</p>
-                        <p style="font-size: 12px; color: #7a7268;">Transition from Junior to Senior role shows promotion/career progression</p>
-                    </div>
-
-                    <div style="margin: 16px 0;">
-                        <h5 style="color: #0f1b2d; font-weight: 600; margin-bottom: 8px;">Career Progression</h5>
-                        <p>• Started as Junior Software Engineer (technical IC)</p>
-                        <p>• Advanced to Senior Systems Engineer (leadership potential)</p>
-                        <p>• Currently leading team of 5 engineers</p>
-                    </div>
-
-                    <div class="alert-box">
-                        <strong>Assessment:</strong> Clear career trajectory with demonstrated growth. Currently employed in a senior capacity with team leadership experience.
-                    </div>
+                    <p>Loading experience data...</p>
                 </div>
             </div>
 
             <!-- TAB 3: Skill Alignment -->
             <div id="skills" class="tab-content">
                 <div class="analysis-box">
-                    <h4>Skill Alignment Analysis</h4>
-
-                    <div style="margin: 16px 0;">
-                        <h5 style="color: #0f1b2d; font-weight: 600; margin-bottom: 8px;">Claimed Skills</h5>
-                        <div>
-                            <span class="skill-tag">Python</span>
-                            <span class="skill-tag">SQL</span>
-                            <span class="skill-tag">AWS</span>
-                            <span class="skill-tag">Docker</span>
-                            <span class="skill-tag">Research</span>
-                            <span class="skill-tag">Machine Learning</span>
-                            <span class="skill-tag">System Design</span>
-                        </div>
-                    </div>
-
-                    <div style="margin: 16px 0;">
-                        <h5 style="color: #0f1b2d; font-weight: 600; margin-bottom: 8px;">Skills-Experience Alignment</h5>
-                        <p><strong>Alignment Ratio: 85.7%</strong></p>
-                        <p style="font-size: 12px; color: #7a7268;">Evidence found for: Python, SQL, AWS, Research, System Design (5 out of 7 skills)</p>
-                    </div>
-
-                    <div style="margin: 16px 0;">
-                        <h5 style="color: #0f1b2d; font-weight: 600; margin-bottom: 8px;">Evidence from Experience</h5>
-                        <ul>
-                            <li><strong>Systems Engineer</strong> role aligns well with: AWS, System Design, Architecture</li>
-                            <li><strong>Research Publications:</strong> 2 publications demonstrate research skill</li>
-                            <li><strong>Technical Stack:</strong> Cloud systems work validates SQL, Python, Docker expertise</li>
-                        </ul>
-                    </div>
-
-                    <div class="alert-box">
-                        <strong>Assessment:</strong> Strong skills-to-experience alignment. Most claimed technical skills are well-supported by work experience and publications.
-                    </div>
+                    <p>Loading skills data...</p>
                 </div>
             </div>
 
-            <!-- TAB 4: Missing Information & Email Draft -->
+            <!-- TAB 4: Missing Information -->
             <div id="missing" class="tab-content">
                 <div class="analysis-box">
-                    <h4>Data Completeness Check</h4>
-                    <p style="color: #0f1b2d; font-weight: 600; margin-bottom: 12px;">✓ Status: No critical information missing</p>
-                    <p style="font-size: 12px; color: #7a7268;">All essential fields are present: Email, Phone, Education, Experience, Skills.</p>
-                </div>
-
-                <div class="analysis-box">
-                    <h4>Personalized Draft Email - Missing Information</h4>
-                    <p style="font-size: 12px; color: #7a7268; margin-bottom: 12px;">Auto-generated draft for cases where information is incomplete:</p>
-                    
-                    <div class="email-draft" id="draftEmail">Dear Ahmed Khan,
-
-Thank you for your interest in our recruitment program. We are currently reviewing your application materials and noticed that the following information is missing or incomplete in your CV:
-
-- Certifications/Awards details
-- Publications DOI numbers
-- References contact information
-
-Could you please provide the missing details or upload an updated CV at your earliest convenience? This will help us complete your profile and proceed to the next evaluation stage.
-
-If you have any questions or need assistance, please don't hesitate to reach out to our HR team.
-
-Best regards,
-TALASH Recruitment Team
-recruitment@talash.com</div>
-
-                    <div class="action-buttons">
-                        <button class="btn-secondary" onclick="copyToClipboard()">Copy Email</button>
-                        <button class="btn-secondary" onclick="sendEmail()">Send Email</button>
-                        <button class="btn-secondary" onclick="exportAnalysis()">Export Analysis</button>
-                    </div>
-                </div>
-
-                <div class="analysis-box">
-                    <h4>Data Quality Metrics</h4>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
-                        <div>
-                            <p style="font-size: 12px; color: #7a7268; margin: 0;">Profile Completeness</p>
-                            <p style="font-size: 20px; font-weight: 700; color: #0f1b2d; margin: 4px 0;" id="profileCompleteness">95%</p>
-                        </div>
-                        <div>
-                            <p style="font-size: 12px; color: #7a7268; margin: 0;">With Research Output</p>
-                            <p style="font-size: 20px; font-weight: 700; color: #0f1b2d; margin: 4px 0;" id="researchAvailability">Yes</p>
-                        </div>
-                        <div>
-                            <p style="font-size: 12px; color: #7a7268; margin: 0;">Experience Count</p>
-                            <p style="font-size: 20px; font-weight: 700; color: #0f1b2d; margin: 4px 0;" id="experienceCount">2 Roles</p>
-                        </div>
-                    </div>
+                    <p>Loading missing information...</p>
                 </div>
             </div>
         </main>
     </div>
 
+    <script src="js/main.js"></script>
     <script>
         function switchTab(tabName) {
-            // Hide all tab contents
             const contents = document.querySelectorAll('.tab-content');
             contents.forEach(content => content.classList.remove('active'));
-
-            // Remove active class from all buttons
             const buttons = document.querySelectorAll('.tab-btn');
             buttons.forEach(btn => btn.classList.remove('active'));
-
-            // Show selected tab
             document.getElementById(tabName).classList.add('active');
             event.target.classList.add('active');
         }
 
         function copyToClipboard() {
-            const emailText = document.querySelector('.email-draft').textContent;
+            const emailText = document.querySelector('.email-draft')?.textContent || '';
             navigator.clipboard.writeText(emailText).then(() => {
                 alert('Email draft copied to clipboard!');
             });
         }
 
         function sendEmail() {
-            alert('In production, this would send the email via SMTP server. Demo functionality only.');
+            alert('In production, this would send the email via SMTP server.');
         }
 
         function exportAnalysis() {
+            const name = document.getElementById('candidateName').textContent;
             const analysis = {
-                candidate: 'Ahmed Khan',
+                candidate: name,
                 date: new Date().toISOString(),
-                analyses: {
-                    education: 'Excellent institutional quality',
-                    experience: 'Clear career progression',
-                    skills: '85.7% alignment',
-                    completeness: '95%'
-                }
+                profileStatus: document.getElementById('profileStatus').textContent
             };
-            
             const dataStr = JSON.stringify(analysis, null, 2);
             const dataBlob = new Blob([dataStr], { type: 'application/json' });
             const url = URL.createObjectURL(dataBlob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `analysis_${analysis.candidate}_${new Date().getTime()}.json`;
+            link.download = `analysis_${name}_${new Date().getTime()}.json`;
             link.click();
         }
 
@@ -403,40 +251,120 @@ recruitment@talash.com</div>
             const candidateId = params.get('id') || '1';
 
             try {
+                // Load candidate info
                 const candidateResponse = await fetch(`/api/candidate/${candidateId}`);
                 if (candidateResponse.ok) {
                     const candidate = await candidateResponse.json();
                     document.getElementById('candidateName').textContent = candidate.name || 'Unknown';
                     document.getElementById('candidateEmail').textContent = candidate.email || 'N/A';
-                    document.getElementById('candidatePhone').textContent = candidate.phone || 'N/A';
+                    document.getElementById('candidatePhone').textContent = candidate.phone_number || 'N/A';
+                    document.getElementById('analysisDate').textContent = new Date().toISOString().split('T')[0];
                 }
 
+                // Load analysis
                 const analysisResponse = await fetch(`/api/analysis-output/${candidateId}`);
                 if (analysisResponse.ok) {
                     const analysis = await analysisResponse.json();
-                    const summary = analysis.candidate_summary || {};
-                    const research = analysis.research_profile || {};
-                    const experience = analysis.experience_analysis || {};
-                    const completeness = summary.missing_items === 0 ? '95%' : '80%';
 
-                    document.getElementById('profileCompleteness').textContent = completeness;
-                    document.getElementById('researchAvailability').textContent = (research.output_count || 0) > 0 ? 'Yes' : 'No';
-                    document.getElementById('experienceCount').textContent = `${experience.employment_history_count || 0} Roles`;
-                }
-
-                const emailResponse = await fetch(`/api/missing-info-email/${candidateId}`);
-                if (emailResponse.ok) {
-                    const emailPayload = await emailResponse.json();
-                    if (emailPayload.draft_email) {
-                        document.getElementById('draftEmail').textContent = emailPayload.draft_email;
+                    // Update Education tab
+                    const educationTab = document.getElementById('education');
+                    if (educationTab && analysis.education_analysis) {
+                        const edu = analysis.education_analysis;
+                        educationTab.innerHTML = `
+                            <div class="analysis-box">
+                                <h4>Educational Profile Analysis</h4>
+                                <div style="margin: 16px 0;">
+                                    <h5 style="color: #0f1b2d; font-weight: 600; margin-bottom: 8px;">Highest Qualification</h5>
+                                    <p>${edu.highest_qualification || 'Not specified'}</p>
+                                </div>
+                                <div style="margin: 16px 0;">
+                                    <h5 style="color: #0f1b2d; font-weight: 600; margin-bottom: 8px;">Institutional Quality Assessment</h5>
+                                    <p>${edu.institutional_quality || 'Not specified'}</p>
+                                </div>
+                                <div style="margin: 16px 0;">
+                                    <h5 style="color: #0f1b2d; font-weight: 600; margin-bottom: 8px;">Educational Gaps</h5>
+                                    ${edu.educational_gaps && edu.educational_gaps.length > 0 ? (Array.isArray(edu.educational_gaps) ? 
+                                        `<ul>${edu.educational_gaps.map(g => `<li>${g}</li>`).join('')}</ul>` :
+                                        `<p>${edu.educational_gaps}</p>`) : '<p>✓ No significant educational gaps detected</p>'}
+                                </div>
+                            </div>
+                        `;
                     }
+
+                    // Update Experience tab
+                    const experienceTab = document.getElementById('experience');
+                    if (experienceTab && analysis.experience_analysis) {
+                        const exp = analysis.experience_analysis;
+                        experienceTab.innerHTML = `
+                            <div class="analysis-box">
+                                <h4>Professional Experience Analysis</h4>
+                                <div style="margin: 16px 0;">
+                                    <h5 style="color: #0f1b2d; font-weight: 600; margin-bottom: 8px;">Employment History</h5>
+                                    <p>${exp.employment_history_count || 0} positions held</p>
+                                </div>
+                                <div style="margin: 16px 0;">
+                                    <h5 style="color: #0f1b2d; font-weight: 600; margin-bottom: 8px;">Career Progression</h5>
+                                    <p>${exp.career_progression || 'Not specified'}</p>
+                                </div>
+                                <div style="margin: 16px 0;">
+                                    <h5 style="color: #0f1b2d; font-weight: 600; margin-bottom: 8px;">Timeline Consistency</h5>
+                                    ${exp.professional_gaps && exp.professional_gaps.length > 0 ? `<p>✓ ${exp.professional_gaps.join(', ')}</p>` : '<p>✓ No significant professional gaps detected</p>'}
+                                    ${exp.timeline_overlaps && exp.timeline_overlaps.length > 0 ? `<p>✓ ${exp.timeline_overlaps.join(', ')}</p>` : '<p>✓ No job overlaps detected</p>'}
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    // Update Skills tab
+                    const skillsTab = document.getElementById('skills');
+                    if (skillsTab && analysis.skill_alignment) {
+                        skillsTab.innerHTML = `
+                            <div class="analysis-box">
+                                <h4>Skill Alignment Analysis</h4>
+                                <p>${typeof analysis.skill_alignment === 'string' ? analysis.skill_alignment : JSON.stringify(analysis.skill_alignment, null, 2)}</p>
+                            </div>
+                        `;
+                    }
+
+                    // Update Missing Information tab
+                    const missingTab = document.getElementById('missing');
+                    if (missingTab && analysis.missing_information) {
+                        const missing = analysis.missing_information;
+                        const fields = Array.isArray(missing.missing_fields) ? missing.missing_fields : 
+                                      typeof missing.missing_fields === 'string' ? missing.missing_fields.split('\n').filter(f => f.trim()) : [];
+
+                        missingTab.innerHTML = `
+                            <div class="analysis-box">
+                                <h4>Data Completeness Check</h4>
+                                <p style="color: #0f1b2d; font-weight: 600; margin-bottom: 12px;">
+                                    ${fields.length === 0 ? '✓ Status: No critical information missing' : '⚠ Status: Missing information detected'}
+                                </p>
+                                ${fields.length === 0 ? 
+                                    '<p style="font-size: 12px; color: #7a7268;">All essential fields are present.</p>' :
+                                    `<ul>${fields.map(f => `<li>${f}</li>`).join('')}</ul>`}
+                            </div>
+                            <div class="analysis-box">
+                                <h4>Personalized Draft Email</h4>
+                                <div class="email-draft" id="draftEmail">${missing.draft_email || 'No email template available'}</div>
+                                <div class="action-buttons">
+                                    <button class="btn-secondary" onclick="copyToClipboard()">Copy Email</button>
+                                    <button class="btn-secondary" onclick="sendEmail()">Send Email</button>
+                                    <button class="btn-secondary" onclick="exportAnalysis()">Export Analysis</button>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    document.getElementById('profileStatus').textContent = 'COMPLETE';
                 }
             } catch (error) {
-                console.error('Failed to load analysis data:', error);
+                console.error('Failed to load analysis:', error);
+                alert('Error loading analysis. Make sure the backend is running.');
             }
         }
 
-        loadAnalysisFromBackend();
+        // Load data when page loads
+        document.addEventListener('DOMContentLoaded', loadAnalysisFromBackend);
     </script>
 </body>
 </html>

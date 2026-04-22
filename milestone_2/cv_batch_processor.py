@@ -22,6 +22,7 @@ GEMINI_MODEL_NAME = os.getenv('GEMINI_MODEL_NAME', 'gemini-3.1-flash-lite-previe
 GEMINI_ENABLED = os.getenv('TALASH_DISABLE_GEMINI', '').strip().lower() not in {'1', 'true', 'yes'}
 _GEMINI_CONFIGURED = False
 MAX_CANDIDATES_PER_PDF = 50  # Limit batch processing to first N candidates per PDF to avoid rate limits
+GEMINI_COOLDOWN_SECONDS = float(os.getenv('TALASH_GEMINI_COOLDOWN_SECONDS', '2.0'))
 
 UNIVERSITY_MAP = {
     'nust': 'National University of Sciences and Technology',
@@ -365,6 +366,22 @@ def _parse_json_payload(raw_text):
     return json.loads(cleaned)
 
 
+def _cooldown_sleep(seconds, reason):
+    """Throttle Gemini requests to reduce token/rate-limit failures."""
+    delay = max(0.0, float(seconds))
+    if delay <= 0:
+        return
+    print(f"[GEMINI] Waiting {delay:.1f}s ({reason})")
+    time.sleep(delay)
+
+
+def _is_token_or_rate_limit_error(error):
+    """Detect token/quota/rate errors using provider message text."""
+    message = str(error).lower()
+    keywords = ['token', 'rate', 'quota', '429', 'resource exhausted', 'too many requests']
+    return any(word in message for word in keywords)
+
+
 def _normalize_structured_extraction(payload, fallback_name):
     """Fill the schema expected by the Milestone 2 app."""
     payload = payload if isinstance(payload, dict) else {}
@@ -454,6 +471,9 @@ def _extract_with_gemini(raw_text, fallback_name):
     max_attempts = 4
     for attempt in range(max_attempts):
         try:
+            # Space out requests to avoid burst failures and token/quota throttling.
+            _cooldown_sleep(GEMINI_COOLDOWN_SECONDS, f"pre-request cooldown for {fallback_name}")
+
             response = model.generate_content(
                 prompt,
                 generation_config={'response_mime_type': 'application/json'}
@@ -469,11 +489,15 @@ def _extract_with_gemini(raw_text, fallback_name):
                 return _normalize_structured_extraction(parsed, fallback_name)
         except json.JSONDecodeError as e:
             print(f"[GEMINI] ✗ Attempt {attempt + 1}/{max_attempts} - JSON decode error: {str(e)[:100]}")
-            time.sleep(2 + attempt)
+            _cooldown_sleep(2 + attempt, "retry after JSON decode error")
             continue
         except Exception as e:
             print(f"[GEMINI] ✗ Attempt {attempt + 1}/{max_attempts} - {type(e).__name__}: {str(e)[:100]}")
-            time.sleep(2 + attempt)
+            if _is_token_or_rate_limit_error(e):
+                # Longer backoff when provider indicates token/rate pressure.
+                _cooldown_sleep(GEMINI_COOLDOWN_SECONDS + 4 + attempt * 2, "token/rate limit backoff")
+            else:
+                _cooldown_sleep(2 + attempt, "generic retry backoff")
             continue
 
     print(f"[GEMINI] ✗ Failed after {max_attempts} attempts, falling back to rule-based")

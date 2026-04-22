@@ -21,7 +21,7 @@ except ImportError:
 GEMINI_MODEL_NAME = os.getenv('GEMINI_MODEL_NAME', 'gemini-3.1-flash-lite-preview')
 GEMINI_ENABLED = os.getenv('TALASH_DISABLE_GEMINI', '').strip().lower() not in {'1', 'true', 'yes'}
 _GEMINI_CONFIGURED = False
-MAX_CANDIDATES_PER_PDF = 3  # Limit batch processing to first N candidates per PDF to avoid rate limits
+MAX_CANDIDATES_PER_PDF = 50  # Limit batch processing to first N candidates per PDF to avoid rate limits
 
 UNIVERSITY_MAP = {
     'nust': 'National University of Sciences and Technology',

@@ -56,6 +56,11 @@ button,
     top: 0;
 }
 
+.sidebar nav {
+    flex: 1;
+    margin-top: 20px;
+}
+
 .logo h1 {
     margin: 0;
     font-size: 2rem;
@@ -72,12 +77,15 @@ button,
 
 .sidebar nav ul {
     list-style: none;
-    margin: 28px 0 0;
+    margin: 0;
     padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .sidebar nav li {
-    margin-bottom: 8px;
+    margin: 0;
 }
 
 .sidebar nav a {
@@ -103,7 +111,7 @@ button,
 }
 
 .upload-cv-sidebar {
-    margin-top: 24px;
+    margin-top: 20px;
 }
 
 .main-content {
@@ -164,6 +172,34 @@ header {
     border-radius: 2px;
     object-fit: cover;
     box-shadow: 0 0 0 1px rgba(18, 24, 38, 0.08);
+}
+
+.avatar-icon {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 2px;
+    font-size: 17px;
+    background: #eee9df;
+    box-shadow: 0 0 0 1px rgba(18, 24, 38, 0.08);
+}
+
+.chart-fallback {
+    position: absolute;
+    inset: 58px 20px 20px;
+    display: grid;
+    place-items: center;
+    padding: 16px;
+    text-align: center;
+    color: #6a7280;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    border: 1px dashed #d8d0c2;
+    background: linear-gradient(180deg, rgba(251, 247, 240, 0.7), rgba(255, 255, 255, 0.9));
+    border-radius: 6px;
+    pointer-events: none;
 }
 
 .dashboard,

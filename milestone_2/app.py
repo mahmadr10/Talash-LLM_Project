@@ -5,12 +5,20 @@ Core CV Processing and Analysis Pipeline API
 
 import os
 import json
+import smtplib
 from pathlib import Path
 from flask import Flask, render_template, request, jsonify, send_file
 from werkzeug.utils import secure_filename
 from datetime import datetime
+from email.message import EmailMessage
 import pdfplumber
 import traceback
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except Exception:
+    pass
 
 # Import the analysis module
 from milestone2 import Milestone2Analysis
@@ -89,6 +97,49 @@ def parse_cv_text_to_structured(raw_text, fallback_name):
     return shared_parse_cv_text_to_structured(raw_text, fallback_name)
 
 
+def _smtp_settings():
+    """Load SMTP settings from environment variables."""
+    host = os.getenv('SMTP_HOST', 'smtp.gmail.com')
+    port = int(os.getenv('SMTP_PORT', '587'))
+    username = os.getenv('SMTP_USERNAME', '')
+    password = os.getenv('SMTP_APP_PASSWORD', '')
+    from_email = os.getenv('SMTP_FROM_EMAIL', username)
+    use_tls = os.getenv('SMTP_USE_TLS', 'true').strip().lower() in {'1', 'true', 'yes'}
+    return {
+        'host': host,
+        'port': port,
+        'username': username,
+        'password': password,
+        'from_email': from_email,
+        'use_tls': use_tls,
+    }
+
+
+def send_email_via_smtp(to_email, subject, body):
+    """Send plain text email via SMTP app password auth."""
+    settings = _smtp_settings()
+    if not settings['username'] or not settings['password']:
+        raise ValueError('SMTP credentials are not configured. Set SMTP_USERNAME and SMTP_APP_PASSWORD.')
+
+    message = EmailMessage()
+    message['Subject'] = subject
+    message['From'] = settings['from_email'] or settings['username']
+    message['To'] = to_email
+    message.set_content(body)
+
+    with smtplib.SMTP(settings['host'], settings['port'], timeout=20) as smtp:
+        if settings['use_tls']:
+            smtp.starttls()
+        smtp.login(settings['username'], settings['password'])
+        smtp.send_message(message)
+
+    return {
+        'to': to_email,
+        'from': message['From'],
+        'subject': subject
+    }
+
+
 def save_analysis_result(candidate_id, analysis_data, filename='outputs/analysis_results.json'):
     """Save analysis result for a candidate to persistent storage."""
     try:
@@ -129,6 +180,16 @@ def load_analysis_result(candidate_id, filename='outputs/analysis_results.json')
     except Exception as e:
         print(f"[ANALYSIS] Error loading analysis: {str(e)}")
         return None
+
+
+def _candidate_score(summary):
+    """Compute a simple, stable score from analysis summary data."""
+    if not isinstance(summary, dict):
+        return 0
+
+    missing_items = int(summary.get('missing_items', 0) or 0)
+    score = 100 - (missing_items * 4)
+    return max(0, min(100, score))
 
 
 # In-memory candidate database (for demo purposes)
@@ -221,13 +282,16 @@ def get_candidates():
     for cid, data in candidate_database.items():
         analyzer = Milestone2Analysis(data)
         summary = analyzer.run_all_analyses().get('candidate_summary', {})
+        score = _candidate_score(summary)
         candidates.append({
             'id': cid,
             'name': data['candidates']['full_name'],
             'email': data['candidates']['email'],
             'status': 'COMPLETE' if summary.get('missing_items', 0) == 0 else 'REVIEW',
             'experience_count': summary.get('experience_entries', 0),
-            'skills_count': summary.get('skills_entries', 0)
+            'skills_count': summary.get('skills_entries', 0),
+            'score': score,
+            'score_display': f'{score}/100'
         })
     return jsonify({'candidates': candidates, 'total': len(candidates)})
 
@@ -565,6 +629,41 @@ def get_missing_info_email(candidate_id):
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/send-missing-info-email/<int:candidate_id>', methods=['POST'])
+def send_missing_info_email(candidate_id):
+    """Send missing-information draft email to candidate via SMTP."""
+    if candidate_id not in candidate_database:
+        return jsonify({'error': 'Candidate not found'}), 404
+
+    try:
+        data = candidate_database[candidate_id]
+        analyzer = Milestone2Analysis(data)
+        results = analyzer.run_all_analyses()
+        missing_info = results.get('missing_information', {}) if isinstance(results, dict) else {}
+
+        payload = request.get_json(silent=True) or {}
+        to_email = (payload.get('to_email') or data.get('candidates', {}).get('email') or '').strip()
+        subject = (payload.get('subject') or f"TALASH: Additional Information Required - Candidate ID {candidate_id}").strip()
+        body = (payload.get('body') or missing_info.get('draft_email') or '').strip()
+
+        if not to_email:
+            return jsonify({'error': 'Candidate email is missing. Please provide to_email in request body.'}), 400
+        if not body:
+            return jsonify({'error': 'Email body is empty. No missing-information draft available.'}), 400
+
+        receipt = send_email_via_smtp(to_email, subject, body)
+        return jsonify({
+            'status': 'sent',
+            'candidate_id': candidate_id,
+            'candidate_name': data.get('candidates', {}).get('full_name', 'Unknown'),
+            'email': receipt
+        })
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        return jsonify({'error': f'Failed to send email: {str(e)}'}), 500
 
 @app.route('/health', methods=['GET'])
 def health_check():

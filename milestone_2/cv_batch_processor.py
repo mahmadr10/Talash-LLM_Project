@@ -19,10 +19,37 @@ except ImportError:
 
 
 GEMINI_MODEL_NAME = os.getenv('GEMINI_MODEL_NAME', 'gemini-3.1-flash-lite-preview')
+GEMINI_MODEL_FALLBACKS = [
+    model.strip()
+    for model in os.getenv('TALASH_GEMINI_MODELS', '').split(',')
+    if model.strip()
+]
 GEMINI_ENABLED = os.getenv('TALASH_DISABLE_GEMINI', '').strip().lower() not in {'1', 'true', 'yes'}
 _GEMINI_CONFIGURED = False
 MAX_CANDIDATES_PER_PDF = 50  # Limit batch processing to first N candidates per PDF to avoid rate limits
 GEMINI_COOLDOWN_SECONDS = float(os.getenv('TALASH_GEMINI_COOLDOWN_SECONDS', '2.0'))
+
+SECTION_HEADERS = {
+    'skills': [
+        'skills', 'technical skills', 'core competencies', 'competencies', 'tools',
+        'technologies', 'technology stack', 'programming languages'
+    ],
+    'education': ['education', 'academic background', 'academics', 'qualification', 'qualifications'],
+    'experience': ['experience', 'work experience', 'employment history', 'professional experience']
+}
+
+SECTION_STOP_HEADERS = {
+    'skills': ['education', 'experience', 'projects', 'publications', 'certifications', 'references'],
+    'education': ['experience', 'skills', 'projects', 'publications', 'certifications', 'references'],
+    'experience': ['education', 'skills', 'projects', 'publications', 'certifications', 'references']
+}
+
+SKILL_CATEGORY_HINTS = {
+    'Research': ['research', 'publication', 'methodology', 'academic', 'thesis'],
+    'Soft': ['leadership', 'communication', 'teamwork', 'collaboration', 'mentoring', 'management'],
+    'Tool': ['excel', 'tableau', 'power bi', 'jira', 'confluence', 'git', 'github', 'linux', 'windows'],
+    'Technical': ['python', 'java', 'sql', 'javascript', 'machine learning', 'ai', 'data', 'cloud', 'docker'],
+}
 
 UNIVERSITY_MAP = {
     'nust': 'National University of Sciences and Technology',
@@ -366,6 +393,20 @@ def _parse_json_payload(raw_text):
     return json.loads(cleaned)
 
 
+def _iter_gemini_models():
+    """Return configured models in priority order with duplicates removed."""
+    models = [GEMINI_MODEL_NAME] + GEMINI_MODEL_FALLBACKS
+    deduped = []
+    seen = set()
+    for model_name in models:
+        key = model_name.strip().lower()
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        deduped.append(model_name.strip())
+    return deduped
+
+
 def _cooldown_sleep(seconds, reason):
     """Throttle Gemini requests to reduce token/rate-limit failures."""
     delay = max(0.0, float(seconds))
@@ -465,43 +506,198 @@ def _extract_with_gemini(raw_text, fallback_name):
     cv_chunk = _candidate_text_chunk(raw_text)
     prompt = f"{SYSTEM_PROMPT}\n\nPreferred candidate name: {fallback_name}\n\nCV TEXT:\n{cv_chunk}"
 
-    model = genai.GenerativeModel(GEMINI_MODEL_NAME)
-    print(f"[GEMINI] → Calling {GEMINI_MODEL_NAME} for: {fallback_name}")
-    
     max_attempts = 4
-    for attempt in range(max_attempts):
-        try:
-            # Space out requests to avoid burst failures and token/quota throttling.
-            _cooldown_sleep(GEMINI_COOLDOWN_SECONDS, f"pre-request cooldown for {fallback_name}")
+    model_names = _iter_gemini_models()
+    for model_name in model_names:
+        model = genai.GenerativeModel(model_name)
+        print(f"[GEMINI] -> Calling {model_name} for: {fallback_name}")
 
-            response = model.generate_content(
-                prompt,
-                generation_config={'response_mime_type': 'application/json'}
-            )
-            response_text = getattr(response, 'text', '') or ''
-            if not response_text and getattr(response, 'candidates', None):
-                response_text = str(response.candidates[0])
+        for attempt in range(max_attempts):
+            try:
+                # Space out requests to avoid burst failures and token/quota throttling.
+                _cooldown_sleep(GEMINI_COOLDOWN_SECONDS, f"pre-request cooldown for {fallback_name}")
 
-            parsed = _parse_json_payload(response_text)
-            if isinstance(parsed, dict):
-                parsed['gemini_used'] = True
-                print(f"[GEMINI] ✓ Successfully extracted via Gemini")
-                return _normalize_structured_extraction(parsed, fallback_name)
-        except json.JSONDecodeError as e:
-            print(f"[GEMINI] ✗ Attempt {attempt + 1}/{max_attempts} - JSON decode error: {str(e)[:100]}")
-            _cooldown_sleep(2 + attempt, "retry after JSON decode error")
-            continue
-        except Exception as e:
-            print(f"[GEMINI] ✗ Attempt {attempt + 1}/{max_attempts} - {type(e).__name__}: {str(e)[:100]}")
-            if _is_token_or_rate_limit_error(e):
-                # Longer backoff when provider indicates token/rate pressure.
-                _cooldown_sleep(GEMINI_COOLDOWN_SECONDS + 4 + attempt * 2, "token/rate limit backoff")
-            else:
-                _cooldown_sleep(2 + attempt, "generic retry backoff")
-            continue
+                response = model.generate_content(
+                    prompt,
+                    generation_config={'response_mime_type': 'application/json'}
+                )
+                response_text = getattr(response, 'text', '') or ''
+                if not response_text and getattr(response, 'candidates', None):
+                    response_text = str(response.candidates[0])
+
+                parsed = _parse_json_payload(response_text)
+                if isinstance(parsed, dict):
+                    parsed['gemini_used'] = True
+                    parsed['gemini_model'] = model_name
+                    print(f"[GEMINI] + Successfully extracted via Gemini ({model_name})")
+                    return _normalize_structured_extraction(parsed, fallback_name)
+            except json.JSONDecodeError as e:
+                print(f"[GEMINI] x Model {model_name} attempt {attempt + 1}/{max_attempts} - JSON decode error: {str(e)[:100]}")
+                _cooldown_sleep(2 + attempt, "retry after JSON decode error")
+                continue
+            except Exception as e:
+                print(f"[GEMINI] x Model {model_name} attempt {attempt + 1}/{max_attempts} - {type(e).__name__}: {str(e)[:100]}")
+                if _is_token_or_rate_limit_error(e):
+                    # Longer backoff when provider indicates token/rate pressure.
+                    _cooldown_sleep(GEMINI_COOLDOWN_SECONDS + 4 + attempt * 2, "token/rate limit backoff")
+                else:
+                    _cooldown_sleep(2 + attempt, "generic retry backoff")
+                continue
+
+        print(f"[GEMINI] x Model {model_name} exhausted retries")
 
     print(f"[GEMINI] ✗ Failed after {max_attempts} attempts, falling back to rule-based")
     return None
+
+
+def _extract_candidate_name(text, fallback_name):
+    """Heuristic candidate-name extractor when LLM extraction is unavailable."""
+    for line in (text or '').splitlines()[:25]:
+        cleaned = re.sub(r'\s+', ' ', line).strip(' -:\t')
+        if len(cleaned) < 3 or len(cleaned) > 80:
+            continue
+        lower = cleaned.lower()
+        if any(token in lower for token in ['email', 'phone', 'mobile', 'address', 'objective', 'summary']):
+            continue
+        if re.search(r'[^A-Za-z\s\.-]', cleaned):
+            continue
+        words = cleaned.replace('.', ' ').split()
+        if 2 <= len(words) <= 5:
+            return ' '.join(word.capitalize() for word in words)
+    return fallback_name
+
+
+def _extract_section_lines(text, section_key):
+    """Extract probable lines under a CV section header."""
+    headers = SECTION_HEADERS.get(section_key, [])
+    stop_headers = SECTION_STOP_HEADERS.get(section_key, [])
+    lines = (text or '').splitlines()
+    collected = []
+    collecting = False
+
+    for raw_line in lines:
+        line = re.sub(r'\s+', ' ', raw_line).strip()
+        if not line:
+            if collecting and collected:
+                break
+            continue
+
+        normalized = line.lower().strip(':-')
+        if any(normalized.startswith(h) for h in headers):
+            collecting = True
+            continue
+
+        if collecting and any(normalized.startswith(h) for h in stop_headers):
+            break
+
+        if collecting:
+            collected.append(line)
+
+    return collected
+
+
+def _guess_skill_category(skill_name):
+    skill = (skill_name or '').lower()
+    for category, hints in SKILL_CATEGORY_HINTS.items():
+        if any(hint in skill for hint in hints):
+            return category
+    return 'Technical'
+
+
+def _extract_skills_rule_based(text):
+    """Extract skills without hardcoded fixed-skill lists."""
+    candidates = []
+    section_lines = _extract_section_lines(text, 'skills')
+
+    if section_lines:
+        merged = ' | '.join(section_lines)
+        parts = re.split(r'[|,;/\\]|\s+-\s+|\s{2,}', merged)
+        candidates.extend(parts)
+    else:
+        # Fallback: parse generic "proficient/experienced/familiar" expressions.
+        phrase_matches = re.findall(
+            r'(?:proficient in|experienced with|experience in|familiar with|tools?:)\s*([^\n\.]+)',
+            text or '',
+            flags=re.IGNORECASE
+        )
+        for phrase in phrase_matches:
+            candidates.extend(re.split(r'[,;/]|\band\b', phrase, flags=re.IGNORECASE))
+
+    seen = set()
+    structured = []
+    for token in candidates:
+        cleaned = re.sub(r'^[\-•*\d\.)\s]+', '', token or '').strip()
+        cleaned = re.sub(r'\s+', ' ', cleaned)
+        if not cleaned or len(cleaned) < 2:
+            continue
+        if len(cleaned) > 40:
+            continue
+        if cleaned.lower() in {'skills', 'technical', 'core', 'competencies', 'others'}:
+            continue
+        key = cleaned.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        structured.append({
+            'skill_name': cleaned,
+            'skill_category': _guess_skill_category(cleaned)
+        })
+
+    return structured
+
+
+def _extract_education_rule_based(text):
+    records = []
+    degree_pattern = re.compile(r'(phd|m\.?s|m\.?sc|b\.?s|b\.?sc|mba|bba|fsc|hssc|ssc)', re.IGNORECASE)
+    year_pattern = re.compile(r'(19\d{2}|20\d{2})')
+
+    for line in _extract_section_lines(text, 'education'):
+        if not degree_pattern.search(line):
+            continue
+        year_match = year_pattern.search(line)
+        metric = 'Unknown'
+        grade = None
+        if re.search(r'cgpa|gpa', line, re.IGNORECASE):
+            metric = 'CGPA' if re.search(r'cgpa', line, re.IGNORECASE) else 'GPA'
+            grade_match = re.search(r'(\d+(?:\.\d+)?)\s*(?:/\s*4(?:\.0+)?)?', line)
+            if grade_match:
+                grade = extract_float(grade_match.group(1))
+
+        records.append({
+            'degree_name': degree_pattern.search(line).group(1).upper().replace('.', ''),
+            'specialization': '',
+            'institution_name': '',
+            'grade_value': grade,
+            'grade_metric': metric,
+            'passing_year': int(year_match.group(1)) if year_match else None,
+            'is_sse_hssc': bool(re.search(r'fsc|hssc|ssc|matric|o-?levels', line, re.IGNORECASE)),
+            'qs_ranking': None,
+            'the_ranking': None,
+        })
+    return records
+
+
+def _extract_experience_rule_based(text):
+    records = []
+    year_span = re.compile(r'(19\d{2}|20\d{2}).{0,12}(19\d{2}|20\d{2}|present)', re.IGNORECASE)
+    for line in _extract_section_lines(text, 'experience'):
+        if len(line) < 4:
+            continue
+        match = year_span.search(line)
+        start_date = match.group(1) if match else ''
+        end_date = match.group(2).title() if match else ''
+        records.append({
+            'job_title': line.split(',')[0][:120],
+            'organization': '',
+            'location': '',
+            'start_date': start_date,
+            'end_date': end_date,
+            'is_current': end_date.lower() == 'present',
+            'job_description': line[:300],
+            'industry': '',
+            'duration_months': None,
+        })
+    return records
 
 
 def parse_cv_text_to_structured(raw_text, fallback_name):
@@ -514,27 +710,18 @@ def parse_cv_text_to_structured(raw_text, fallback_name):
     email_match = re.search(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}', text)
     phone_match = re.search(r'(\+?\d[\d\s\-]{8,}\d)', text)
 
-    skill_tokens = [
-        'python', 'sql', 'aws', 'docker', 'machine learning', 'research', 'statistics',
-        'tableau', 'r', 'data analysis', 'system design', 'flask', 'django'
-    ]
-    found_skills = []
-    seen = set()
-    lower_text = text.lower()
-    for token in skill_tokens:
-        if token in lower_text:
-            normalized = token.title()
-            if normalized.lower() not in seen:
-                found_skills.append({'skill_name': normalized, 'skill_category': 'Technical'})
-                seen.add(normalized.lower())
+    found_skills = _extract_skills_rule_based(text)
+    parsed_name = _extract_candidate_name(text, fallback_name)
+    parsed_education = _extract_education_rule_based(text)
+    parsed_experience = _extract_experience_rule_based(text)
 
     return {
-        'name': fallback_name,
+        'name': parsed_name,
         'email': email_match.group(0) if email_match else '',
         'phone_number': phone_match.group(0).strip() if phone_match else '',
         'skills': found_skills,
-        'education': [],
-        'experience': [],
+        'education': parsed_education,
+        'experience': parsed_experience,
         'research_outputs': [],
         'certifications': [],
         'awards': [],

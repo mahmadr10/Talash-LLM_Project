@@ -141,7 +141,7 @@
                 <div class="user-profile">
                     <div class="profile">
                         <span>PROFILE</span>
-                        <img src="https://via.placeholder.com/30" alt="User Avatar">
+                        <span class="avatar-icon" aria-label="User Avatar" role="img">👤</span>
                     </div>
                 </div>
             </header>
@@ -226,8 +226,27 @@
             });
         }
 
-        function sendEmail() {
-            alert('In production, this would send the email via SMTP server.');
+        async function sendEmail() {
+            const params = new URLSearchParams(window.location.search);
+            const candidateId = params.get('id') || '1';
+            const draftBody = document.getElementById('draftEmail')?.textContent || '';
+
+            try {
+                const response = await fetch(`/api/send-missing-info-email/${candidateId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ body: draftBody })
+                });
+                const payload = await response.json();
+                if (!response.ok) {
+                    throw new Error(payload.error || 'Email send failed');
+                }
+                alert(`Email sent successfully to ${payload.email.to}`);
+            } catch (error) {
+                alert(`Could not send email: ${error.message}`);
+            }
         }
 
         function exportAnalysis() {
@@ -257,7 +276,7 @@
                     const candidate = await candidateResponse.json();
                     document.getElementById('candidateName').textContent = candidate.name || 'Unknown';
                     document.getElementById('candidateEmail').textContent = candidate.email || 'N/A';
-                    document.getElementById('candidatePhone').textContent = candidate.phone_number || 'N/A';
+                    document.getElementById('candidatePhone').textContent = candidate.phone || 'N/A';
                     document.getElementById('analysisDate').textContent = new Date().toISOString().split('T')[0];
                 }
 

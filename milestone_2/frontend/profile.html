@@ -36,7 +36,7 @@
                 <div class="user-profile">
                     <div class="profile">
                         <span>PROFILE</span>
-                        <img src="https://via.placeholder.com/30" alt="User Avatar">
+                        <span class="avatar-icon" aria-label="User Avatar" role="img">👤</span>
                     </div>
                 </div>
             </header>
@@ -51,29 +51,29 @@
                 <div class="queue-header">
                     <h3 id="profileName">Loading...</h3>
                     <div class="queue-actions">
-                        <button>DOWNLOAD PROFILE</button>
+                        <button id="downloadProfileBtn" type="button">DOWNLOAD PROFILE</button>
                     </div>
                 </div>
                 <div class="stats">
-                    <div class="stat-card"><h3>OVERALL SCORE</h3><p class="stat-number">94</p></div>
-                    <div class="stat-card"><h3>ANALYSIS STATUS</h3><p class="stat-number" style="font-size: 1.4rem; margin-top: 12px;">COMPLETE</p></div>
-                    <div class="stat-card"><h3>FLAG STATUS</h3><p class="stat-number" style="font-size: 1.4rem; margin-top: 12px;">CLEAR</p></div>
+                    <div class="stat-card"><h3>OVERALL SCORE</h3><p class="stat-number" id="profileScore">94</p></div>
+                    <div class="stat-card"><h3>ANALYSIS STATUS</h3><p class="stat-number" id="profileAnalysisStatus" style="font-size: 1.4rem; margin-top: 12px;">COMPLETE</p></div>
+                    <div class="stat-card"><h3>FLAG STATUS</h3><p class="stat-number" id="profileFlagStatus" style="font-size: 1.4rem; margin-top: 12px;">CLEAR</p></div>
                 </div>
-                <table>
+                <table id="profileSummaryTable">
                     <thead>
                         <tr>
                             <th>SECTION</th>
                             <th>DETAIL</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr><td>Education</td><td>BS, MS, PhD</td></tr>
-                        <tr><td>Experience</td><td>Senior Systems Engineer</td></tr>
-                        <tr><td>Skills</td><td>Python, SQL, Research</td></tr>
+                    <tbody id="profileSummaryBody">
+                        <tr><td colspan="2">Loading profile summary...</td></tr>
                     </tbody>
                 </table>
             </section>
         </main>
     </div>
+
+    <script src="js/main.js"></script>
 </body>
 </html>

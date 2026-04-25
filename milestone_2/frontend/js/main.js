@@ -102,6 +102,8 @@ async function loadDashboardData() {
             apiGet('/api/candidates')
         ]);
 
+        const candidateList = Array.isArray(candidates.candidates) ? candidates.candidates : [];
+
         const statNumbers = document.querySelectorAll('.stat-number');
         if (statNumbers.length >= 3) {
             statNumbers[0].innerHTML = `${stats.total_candidates} <span class="increase">LIVE</span>`;
@@ -112,7 +114,7 @@ async function loadDashboardData() {
         const tableBody = document.querySelector('.analysis-queue table tbody');
         if (tableBody) {
             tableBody.innerHTML = '';
-            candidates.candidates.slice(0, 5).forEach((candidate) => {
+            candidateList.slice(0, 5).forEach((candidate) => {
                 const initials = candidate.name
                     .split(' ')
                     .map(part => part[0])
@@ -132,6 +134,11 @@ async function loadDashboardData() {
                     </tr>
                 `);
             });
+        }
+
+        const pageInfo = document.getElementById('dashboardPageInfo');
+        if (pageInfo) {
+            pageInfo.textContent = `DISPLAYING ${Math.min(candidateList.length, 5)} OF ${stats.total_candidates} CANDIDATE RECORDS`;
         }
     } catch (error) {
         console.error('Failed to load dashboard data:', error);

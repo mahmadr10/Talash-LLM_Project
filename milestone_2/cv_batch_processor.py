@@ -610,15 +610,36 @@ def _normalize_degree_name(line):
 
     if re.search(r'\b(ph\.?d|doctorate|doctoral)\b', text):
         return 'PhD'
-    if re.search(r'\b(m\.?\s?s\.?c?|master\'?s|masters|mphil|mba)\b', text):
+    if re.search(r'\b(m\.?\s?s\.?c?|master\'?s|masters|master|mphil|mba)\b', text):
         return 'MS'
-    if re.search(r'\b(b\.?\s?s\.?c?|bachelor\'?s|bachelors|bba|be|beng)\b', text):
+    if re.search(r'\b(b\.?\s?s\.?c?|bachelor\'?s|bachelors|bachelor|bba|be|beng)\b', text):
         return 'BS'
     if re.search(r'\b(fsc|hssc|intermediate|a-?levels)\b', text):
         return 'HSSC'
     if re.search(r'\b(ssc|matric|o-?levels)\b', text):
         return 'SSC'
     return None
+
+
+def _extract_institution_from_line(line):
+    """Infer institution name from one education line."""
+    text = str(line or '')
+    lowered = text.lower()
+
+    for short_name, full_name in UNIVERSITY_MAP.items():
+        if re.search(rf'\b{re.escape(short_name)}\b', lowered):
+            return full_name
+
+    # Generic fallback: capture phrases ending with institution keywords.
+    match = re.search(
+        r'([A-Za-z][A-Za-z\s\-\.&]{3,}?(?:university|institute|college|school))',
+        text,
+        re.IGNORECASE
+    )
+    if match:
+        return normalize_university(match.group(1))
+
+    return ''
 
 
 def _extract_skills_rule_based(text):
@@ -667,7 +688,7 @@ def _extract_education_rule_based(text):
     records = []
     # Keep degree matching strict to avoid false positives such as "MS Office" from skills text.
     degree_pattern = re.compile(
-        r'\b(ph\.?d|doctorate|doctoral|m\.?\s?s\.?c?|master\'?s|masters|mphil|mba|b\.?\s?s\.?c?|bachelor\'?s|bachelors|bba|be|beng|fsc|hssc|intermediate|a-?levels|ssc|matric|o-?levels)\b',
+        r'\b(ph\.?d|doctorate|doctoral|m\.?\s?s\.?c?|master\'?s|masters|master|mphil|mba|b\.?\s?s\.?c?|bachelor\'?s|bachelors|bachelor|bba|be|beng|fsc|hssc|intermediate|a-?levels|ssc|matric|o-?levels)\b',
         re.IGNORECASE
     )
     year_pattern = re.compile(r'(19\d{2}|20\d{2})')
@@ -677,7 +698,9 @@ def _extract_education_rule_based(text):
         'bachelor', 'master', 'phd', 'matric', 'intermediate', 'hssc', 'ssc', 'fsc'
     }
 
-    for line in _extract_section_lines(text, 'education'):
+    section_lines = _extract_section_lines(text, 'education')
+
+    for idx, line in enumerate(section_lines):
         if not degree_pattern.search(line):
             continue
 
@@ -699,10 +722,25 @@ def _extract_education_rule_based(text):
             if grade_match:
                 grade = extract_float(grade_match.group(1))
 
+        institution_name = _extract_institution_from_line(line)
+        if not institution_name:
+            # Many CVs place the institution on the line above/below the degree title.
+            nearby = []
+            if idx - 1 >= 0:
+                nearby.append(section_lines[idx - 1])
+            if idx - 2 >= 0:
+                nearby.append(section_lines[idx - 2])
+            nearby.extend(section_lines[idx + 1: idx + 3])
+
+            for neighbor in nearby:
+                institution_name = _extract_institution_from_line(neighbor)
+                if institution_name:
+                    break
+
         records.append({
             'degree_name': degree_name,
             'specialization': '',
-            'institution_name': '',
+            'institution_name': institution_name,
             'grade_value': grade,
             'grade_metric': metric,
             'passing_year': int(year_match.group(1)) if year_match else None,

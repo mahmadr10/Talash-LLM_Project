@@ -71,9 +71,22 @@ class Milestone2Analysis:
                 )
 
         # Institutional Quality
+        known_ranked_institutions = {
+            'national university of sciences and technology',
+            'lahore university of management sciences',
+            'ghulam ishaq khan institute',
+            'national university of computer and emerging sciences',
+            'quaid-i-azam university',
+            'comsats university',
+        }
+
         ranked_institutions = [
             record for record in education_sorted
-            if record.get('qs_ranking') is not None or record.get('the_ranking') is not None
+            if (
+                record.get('qs_ranking') is not None
+                or record.get('the_ranking') is not None
+                or str(record.get('institution_name', '')).strip().lower() in known_ranked_institutions
+            )
         ]
 
         reliable_records = [
@@ -238,11 +251,15 @@ class Milestone2Analysis:
             missing_fields.append("Candidate Phone Number")
         
         education = list(self.data.get('education', []))
-        if education and any(record.get('grade_value') in (None, '') for record in education):
+        if not education:
+            missing_fields.append("Education details (degree/institution/year)")
+        elif any(record.get('grade_value') in (None, '') for record in education):
             missing_fields.append("Grade/CGPA for one or more degrees")
 
         experience = list(self.data.get('experience', []))
-        if experience and any(not record.get('job_description') for record in experience):
+        if not experience:
+            missing_fields.append("Professional experience records")
+        elif any(not record.get('job_description') for record in experience):
             missing_fields.append("Job description for one or more experience records")
 
         research_outputs = self.data.get('research_outputs', [])

@@ -80,11 +80,29 @@ function bindUpload(inputId) {
             });
             const payload = await parseApiResponse(response);
 
+            if (payload && payload.candidate_id) {
+                localStorage.setItem('talashLastCandidateId', String(payload.candidate_id));
+            }
+
             alert(`CV uploaded successfully for candidate ID ${payload.candidate_id}.`);
-            if (window.location.pathname.endsWith('index.html')) {
+
+            const path = window.location.pathname;
+            const uploadedId = payload?.candidate_id;
+
+            if (path.endsWith('analysis.html') && uploadedId) {
+                window.location.href = `analysis.html?id=${uploadedId}`;
+                return;
+            }
+
+            if (path.endsWith('profile.html') && uploadedId) {
+                window.location.href = `profile.html?id=${uploadedId}`;
+                return;
+            }
+
+            if (path.endsWith('index.html')) {
                 loadDashboardData();
             }
-            if (window.location.pathname.endsWith('candidates.html')) {
+            if (path.endsWith('candidates.html')) {
                 loadCandidatesData();
             }
         } catch (error) {

@@ -228,7 +228,7 @@
 
         async function sendEmail() {
             const params = new URLSearchParams(window.location.search);
-            const candidateId = params.get('id') || '1';
+            const candidateId = params.get('id') || localStorage.getItem('talashLastCandidateId') || '1';
             const draftBody = document.getElementById('draftEmail')?.textContent || '';
 
             try {
@@ -267,7 +267,7 @@
 
         async function loadAnalysisFromBackend() {
             const params = new URLSearchParams(window.location.search);
-            const candidateId = params.get('id') || '1';
+            const candidateId = params.get('id') || localStorage.getItem('talashLastCandidateId') || '1';
 
             try {
                 // Load candidate info

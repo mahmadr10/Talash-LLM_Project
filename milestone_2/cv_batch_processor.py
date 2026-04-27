@@ -604,6 +604,23 @@ def _guess_skill_category(skill_name):
     return 'Technical'
 
 
+def _normalize_degree_name(line):
+    """Map free-text education line to a canonical degree label."""
+    text = (line or '').lower()
+
+    if re.search(r'\b(ph\.?d|doctorate|doctoral)\b', text):
+        return 'PhD'
+    if re.search(r'\b(m\.?\s?s\.?c?|master\'?s|masters|mphil|mba)\b', text):
+        return 'MS'
+    if re.search(r'\b(b\.?\s?s\.?c?|bachelor\'?s|bachelors|bba|be|beng)\b', text):
+        return 'BS'
+    if re.search(r'\b(fsc|hssc|intermediate|a-?levels)\b', text):
+        return 'HSSC'
+    if re.search(r'\b(ssc|matric|o-?levels)\b', text):
+        return 'SSC'
+    return None
+
+
 def _extract_skills_rule_based(text):
     """Extract skills without hardcoded fixed-skill lists."""
     candidates = []
@@ -648,12 +665,31 @@ def _extract_skills_rule_based(text):
 
 def _extract_education_rule_based(text):
     records = []
-    degree_pattern = re.compile(r'(phd|m\.?s|m\.?sc|b\.?s|b\.?sc|mba|bba|fsc|hssc|ssc)', re.IGNORECASE)
+    # Keep degree matching strict to avoid false positives such as "MS Office" from skills text.
+    degree_pattern = re.compile(
+        r'\b(ph\.?d|doctorate|doctoral|m\.?\s?s\.?c?|master\'?s|masters|mphil|mba|b\.?\s?s\.?c?|bachelor\'?s|bachelors|bba|be|beng|fsc|hssc|intermediate|a-?levels|ssc|matric|o-?levels)\b',
+        re.IGNORECASE
+    )
     year_pattern = re.compile(r'(19\d{2}|20\d{2})')
+    non_degree_markers = {'office', 'excel', 'word', 'powerpoint', 'outlook'}
+    degree_context_markers = {
+        'degree', 'university', 'college', 'institute', 'school', 'cgpa', 'gpa',
+        'bachelor', 'master', 'phd', 'matric', 'intermediate', 'hssc', 'ssc', 'fsc'
+    }
 
     for line in _extract_section_lines(text, 'education'):
         if not degree_pattern.search(line):
             continue
+
+        lower_line = line.lower()
+        # Skip common software-skill lines unless explicit education context is present.
+        if any(marker in lower_line for marker in non_degree_markers) and not any(ctx in lower_line for ctx in degree_context_markers):
+            continue
+
+        degree_name = _normalize_degree_name(line)
+        if not degree_name:
+            continue
+
         year_match = year_pattern.search(line)
         metric = 'Unknown'
         grade = None
@@ -664,7 +700,7 @@ def _extract_education_rule_based(text):
                 grade = extract_float(grade_match.group(1))
 
         records.append({
-            'degree_name': degree_pattern.search(line).group(1).upper().replace('.', ''),
+            'degree_name': degree_name,
             'specialization': '',
             'institution_name': '',
             'grade_value': grade,

@@ -36,6 +36,20 @@ class Milestone2Analysis:
             except (TypeError, ValueError):
                 return None
 
+        def degree_rank(name):
+            text = str(name or '').lower()
+            if any(token in text for token in ('phd', 'doctorate', 'doctoral')):
+                return 5
+            if any(token in text for token in ('ms', 'msc', 'master', 'mphil', 'mba')):
+                return 4
+            if any(token in text for token in ('bs', 'bsc', 'bachelor', 'bba', 'be', 'beng')):
+                return 3
+            if any(token in text for token in ('hssc', 'fsc', 'intermediate', 'a-level')):
+                return 2
+            if any(token in text for token in ('ssc', 'matric', 'o-level')):
+                return 1
+            return 0
+
         education_sorted = sorted(
             education,
             key=lambda record: (parse_year(record) is None, parse_year(record) or 0)
@@ -61,12 +75,28 @@ class Milestone2Analysis:
             record for record in education_sorted
             if record.get('qs_ranking') is not None or record.get('the_ranking') is not None
         ]
+
+        reliable_records = [
+            record for record in education_sorted
+            if record.get('institution_name') or parse_year(record) is not None or record.get('grade_value') is not None
+        ]
+
+        if reliable_records:
+            highest_record = max(
+                reliable_records,
+                key=lambda record: (degree_rank(record.get('degree_name')), parse_year(record) or -1),
+                default=None
+            )
+        else:
+            # Conservative fallback: avoid overstating qualification when extraction confidence is low.
+            non_unknown = [r for r in education_sorted if degree_rank(r.get('degree_name')) > 0]
+            highest_record = min(non_unknown, key=lambda record: degree_rank(record.get('degree_name')), default=None)
         
         summary = {
             "educational_gaps": gaps if gaps else ["No significant educational gaps detected."],
             "institutional_quality": f"{len(ranked_institutions)} out of {len(education_sorted)} "
                                      f"degrees are from ranked institutions.",
-            "highest_qualification": education_sorted[-1].get('degree_name', 'N/A') if education_sorted else "N/A"
+            "highest_qualification": highest_record.get('degree_name', 'N/A') if highest_record else "N/A"
         }
         self.analysis_summary['education_analysis'] = summary
 
